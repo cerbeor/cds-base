@@ -55,8 +55,9 @@ public class SharingService implements TPShareService {
 	@Override
 	public void makePublic(String tpId, String userId, boolean bool) throws ShareException {
 		TestPlan tp = ledger.tpBelongsTo(tpId, userId, EntityAccess.W);
-		if(tp == null)
+		if(tp == null) {
 			throw new ShareException("tp-not-found",tpId);
+		}
 		if(!bool && tp.isPublic()){
 			tp.setPublic(false);
 			tpRepo.save(tp);

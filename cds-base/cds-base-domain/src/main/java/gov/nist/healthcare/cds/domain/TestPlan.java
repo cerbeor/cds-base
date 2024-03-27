@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Document
 public class TestPlan extends ContainingEntity implements Serializable {
@@ -28,6 +27,7 @@ public class TestPlan extends ContainingEntity implements Serializable {
 	private boolean isPublic;
 	private List<String> viewers;
 	private List<TestCaseGroup> testCaseGroups;
+	private boolean archived;
 	
 	public TestPlan(){
 
@@ -148,6 +148,27 @@ public class TestPlan extends ContainingEntity implements Serializable {
 	public void setPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
-	
-	
+
+	public int getNumberOfTestCases() {
+		int nb = 0;
+		if(this.testCases != null) {
+			nb += this.testCases.size();
+		}
+		if(this.testCaseGroups != null) {
+			for(TestCaseGroup group : this.testCaseGroups) {
+				if(group.getTestCases() != null) {
+					nb += group.getTestCases().size();
+				}
+			}
+		}
+		return nb;
+	}
+
+	public boolean isArchived() {
+		return archived;
+	}
+
+	public void setArchived(boolean archived) {
+		this.archived = archived;
+	}
 }

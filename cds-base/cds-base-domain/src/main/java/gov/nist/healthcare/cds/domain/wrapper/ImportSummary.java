@@ -14,6 +14,12 @@ public class ImportSummary {
 	private int imported;
 	private int werrors;
 	private TestPlan testPlan;
+
+	public static ImportSummary unableToAccessTp(){
+		ImportSummary sum = new ImportSummary();
+		sum.resultFor("Request").getErrors().add(new ErrorModel(0,0,"Test Plan","Unable to access test plan"));
+		return sum;
+	}
 	
 	public static ImportSummary invalidFormat(){
 		ImportSummary sum = new ImportSummary();

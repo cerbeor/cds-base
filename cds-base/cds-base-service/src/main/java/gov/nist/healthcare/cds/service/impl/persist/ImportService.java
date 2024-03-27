@@ -31,7 +31,6 @@ public class ImportService {
 	private TestCaseRepository testCaseRepo;
 	@Autowired
 	private TestPlanRepository testPlanRepo;
-	
 	@Autowired
 	private NISTFormatServiceImpl nistFormatProvider;
 	@Autowired
@@ -49,7 +48,7 @@ public class ImportService {
 		throw new UnsupportedFormat(format);
 	}
 	
-	public ImportSummary importTestCases(List<MultipartFile> files, String format, String tpId, ImportConfig config) throws IOException, UnsupportedFormat, ConfigurationException {
+	public ImportSummary importTestCases(List<MultipartFile> files, String format, TestPlan tp, ImportConfig config) throws IOException, UnsupportedFormat, ConfigurationException {
 		ImportSummary results = new ImportSummary();
 		List<TestCase> tcs = new ArrayList<TestCase>();
 		FormatService formatter = this.getFormatterFor(format);
@@ -77,12 +76,11 @@ public class ImportService {
 		}
 		
 		if(tcs.size() > 0){
-			TestPlan tp = testPlanRepo.findOne(tpId);
 			if(config.isOvGroup()){
 				if(config.getGroupId() == null || config.getGroupId().isEmpty()){
 					for(TestCase tc : tcs){
 						tc.setGroupTag("");
-						tc.setTestPlan(tpId);
+						tc.setTestPlan(tp.getId());
 						tp.getTestCases().add(tc);
 					}
 				}
@@ -91,14 +89,14 @@ public class ImportService {
 					if(tcg != null){
 						for(TestCase tc : tcs){
 							tc.setGroupTag(tcg.getId());
-							tc.setTestPlan(tpId);
+							tc.setTestPlan(tp.getId());
 							tcg.getTestCases().add(tc);
 						}
 					}
 					else {
 						for(TestCase tc : tcs){
 							tc.setGroupTag("");
-							tc.setTestPlan(tpId);
+							tc.setTestPlan(tp.getId());
 							tp.getTestCases().add(tc);
 						}
 					}	
@@ -109,8 +107,8 @@ public class ImportService {
 					if(tc.getGroupTag() != null && !tc.getGroupTag().isEmpty()){
 						TestCaseGroup tcg = tp.getByNameOrCreateGroup(tc.getGroupTag());
 						tc.setGroupTag(tcg.getId());
-						tc.setTestPlan(tpId);
-						tcg.setTestPlan(tpId);
+						tc.setTestPlan(tp.getId());
+						tcg.setTestPlan(tp.getId());
 						tcg.getTestCases().add(tc);
 					}
 					else {
