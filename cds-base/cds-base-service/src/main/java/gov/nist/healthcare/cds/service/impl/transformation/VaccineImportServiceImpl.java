@@ -20,10 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -121,6 +118,7 @@ public class VaccineImportServiceImpl implements VaccineImportService {
 	
 	private Set<VaccineGroup> groups(String cvx, InputStream groups){
 		Set<VaccineGroup> vgs = new HashSet<VaccineGroup>();
+		DataFormatter formatter = new DataFormatter();
 		try {
 			Workbook workbook = WorkbookFactory.create(groups);
 			Sheet sheet = workbook.getSheetAt(0);
@@ -132,7 +130,7 @@ public class VaccineImportServiceImpl implements VaccineImportService {
 				if(CVX.equals(cvx)){
 					VaccineGroup vg = new VaccineGroup();
 					String vgName = r.getCell(3).getStringCellValue().trim();
-					String vgCVX = r.getCell(4).getStringCellValue().trim();
+					String vgCVX = formatter.formatCellValue(r.getCell(4)).trim();
 					vg.setCvx(vgCVX);
 					vg.setName(vgName);
 					vgs.add(vg);
