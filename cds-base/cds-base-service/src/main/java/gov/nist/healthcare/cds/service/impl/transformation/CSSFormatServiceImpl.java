@@ -362,7 +362,7 @@ public class CSSFormatServiceImpl implements FormatService {
 		Hashtable<EvaluationReason, String> transform = new Hashtable<EvaluationReason, String>();
 		transform.put(EvaluationReason.H, "Age: Too Old");
 		transform.put(EvaluationReason.C, "Age: Too Young");
-		transform.put(EvaluationReason.D, "Interval: too short");
+		transform.put(EvaluationReason.D, "Interval: too Soon");
 		transform.put(EvaluationReason.E, "Live Virus Conflict");
 		transform.put(EvaluationReason.I, "Series Already Complete");
 
@@ -415,7 +415,10 @@ public class CSSFormatServiceImpl implements FormatService {
 		transform.put("age: too old", EvaluationReason.H);
 		transform.put("age: too young", EvaluationReason.C);
 		transform.put("vaccine: invalid usage", EvaluationReason.G);
+
 		transform.put("interval: too short", EvaluationReason.D);
+		transform.put("interval: too soon", EvaluationReason.D);
+
 		transform.put("live virus conflict", EvaluationReason.E);
 		transform.put("series already complete", EvaluationReason.I);
 

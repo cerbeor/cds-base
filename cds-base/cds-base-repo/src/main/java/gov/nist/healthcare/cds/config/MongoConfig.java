@@ -1,5 +1,6 @@
 package gov.nist.healthcare.cds.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
@@ -12,16 +13,23 @@ import com.mongodb.ServerAddress;
 @EnableMongoRepositories(value="gov.nist.healthcare.cds")
 public class MongoConfig extends AbstractMongoConfiguration {
 
+	@Value("${fits.data.mongodb.host}")
+	private String host;
+
+	@Value("${fits.data.mongodb.port}")
+	private String port;
+
+	@Value("${fits.data.mongodb.database}")
+	private String db;
+
 	@Override
 	protected String getDatabaseName() {
-		return "cdsi-db";
+		return db;
 	}
 
 	@Override
 	public Mongo mongo() throws Exception {
-		//MongoClientOptions o = MongoClientOptions.builder().socketFactory().build();
-		return new MongoClient(new ServerAddress("127.0.0.1",27017));
-//		return new MongoClient(new ServerAddress("127.0.0.1",7777));
+		return new MongoClient(new ServerAddress(host, Integer.parseInt(port)));
 	}
 
 	@Override

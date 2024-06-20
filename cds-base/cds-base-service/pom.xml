@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>gov.nist.healthcare.cds</groupId>
 		<artifactId>cds-base</artifactId>
-		<version>1.0.1</version>
+		<version>1.1.0</version>
 	</parent>
 	<artifactId>cds-base-service</artifactId>
 	<dependencies>
@@ -111,7 +111,7 @@
 		<dependency>
 			<groupId>gov.nist.healthcare.cds</groupId>
 			<artifactId>cds-base-auth</artifactId>
-			<version>1.0.1</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

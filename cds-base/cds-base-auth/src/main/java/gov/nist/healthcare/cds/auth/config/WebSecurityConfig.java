@@ -20,6 +20,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -35,13 +36,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
 	private AuthenticationEntryPoint authenticationEntryPoint;
-	
-	@Autowired
-	private PasswordEncoder encoder;
+
+	@Bean
+	public PasswordEncoder passEncode(){
+		return new BCryptPasswordEncoder();
+	}
 	
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-            auth.userDetailsService(authenticationService).passwordEncoder(encoder);
+            auth.userDetailsService(authenticationService).passwordEncoder(passEncode());
 	}
 	
 	@Override
