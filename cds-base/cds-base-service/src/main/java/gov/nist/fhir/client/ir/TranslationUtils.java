@@ -117,18 +117,11 @@ public class TranslationUtils {
 
     public static String getDateString(org.hl7.fhir.dstu3.model.DateTimeType date) {
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-        if(date.getTimeZone() != null) {
-            sdf.setTimeZone(date.getTimeZone());
-        }
-        Date v = date.getValue();
-        return sdf.format(v);
+        return sdf.format(date.getValue());
     }
 
     public static String getDateString(org.hl7.fhir.r4.model.DateTimeType date) {
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-        if(date.getTimeZone() != null) {
-            sdf.setTimeZone(date.getTimeZone());
-        }
         return sdf.format(date.getValue());
     }
 
