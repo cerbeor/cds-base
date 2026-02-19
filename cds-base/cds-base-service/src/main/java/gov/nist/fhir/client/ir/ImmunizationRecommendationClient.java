@@ -252,16 +252,24 @@ public class ImmunizationRecommendationClient {
 
         } else {
          */
+//        HEREHERE
         org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent assessmentDateParametersParameterFhir = new org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent();
         assessmentDateParametersParameterFhir.setName(Consts.PARAMETER_NAME_ASSESSMENT_DATE);
-        DateType assessmentDateFhir = new DateType();
+        org.hl7.fhir.dstu3.model.DateType assessmentDateFhir = new org.hl7.fhir.dstu3.model.DateType();
+
+        org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent assessmentDateParametersParameterFhirR4 = new org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent();
+        assessmentDateParametersParameterFhirR4.setName(Consts.PARAMETER_NAME_ASSESSMENT_DATE);
+        org.hl7.fhir.r4.model.DateType assessmentDateFhirR4 = new org.hl7.fhir.r4.model.DateType();
 
         try {
             java.util.Date assessmentDate = TranslationUtils.translateHl7DateToJavaDate(sendingConfig.getAssessmentDate());
             assessmentDateFhir.setValue(assessmentDate);
+            assessmentDateFhirR4.setValue(assessmentDate);
 
             //assessmentDateParametersParameterFhir.castToDate(assessmentDateFhir);
             assessmentDateParametersParameterFhir.setValue(assessmentDateFhir);
+            assessmentDateParametersParameterFhirR4.setValue(assessmentDateFhirR4);
+
         } catch (ParseException ex) {
             Logger.getLogger(ImmunizationRecommendationClient.class.getName()).log(Level.SEVERE, null, ex);
             ex.printStackTrace();
@@ -271,6 +279,7 @@ public class ImmunizationRecommendationClient {
             ex.printStackTrace();
         }
         parametersFhir.addParameter(assessmentDateParametersParameterFhir);
+        parametersFhirR4.addParameter(assessmentDateParametersParameterFhirR4);
 
         if (useAdapter || connector.equals(FHIRAdapter.FHIR)) {
             //Adapter uses the old FHIR spec
