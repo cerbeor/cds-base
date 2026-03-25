@@ -252,7 +252,6 @@ public class ImmunizationRecommendationClient {
 
         } else {
          */
-//        HEREHERE
         org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent assessmentDateParametersParameterFhir = new org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent();
         assessmentDateParametersParameterFhir.setName(Consts.PARAMETER_NAME_ASSESSMENT_DATE);
         org.hl7.fhir.dstu3.model.DateType assessmentDateFhir = new org.hl7.fhir.dstu3.model.DateType();
