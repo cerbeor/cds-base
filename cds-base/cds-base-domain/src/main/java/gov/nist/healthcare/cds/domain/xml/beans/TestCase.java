@@ -8,19 +8,16 @@
 
 package gov.nist.healthcare.cds.domain.xml.beans;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
+
+import java.util.List;
 
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -48,20 +45,24 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "name",
-    "description",
-    "group",
-    "dateType",
-    "metaData",
-    "assessmentDate",
-    "patient",
-    "events",
-    "forecasts"
+        "name",
+        "description",
+        "group",
+        "dateType",
+        "metaData",
+        "assessmentDate",
+        "patient",
+        "events",
+        "forecasts",
+        "forecastType",
+        "evaluationType",
+        "workflowTag",
+        "tags",
 })
 @XmlRootElement(name = "TestCase")
 public class TestCase {
@@ -86,14 +87,24 @@ public class TestCase {
     protected ForecastsType forecasts;
     @XmlAttribute(name = "UID")
     protected String uid;
+    @XmlElement(name = "ForecastType")
+    protected String forecastType;
+    @XmlElement(name = "EvaluationType")
+    protected String evaluationType;
+    @XmlElement(name = "WorkflowTag")
+    protected String workflowTag;
+    @XmlElementWrapper(name = "Tags")
+    @XmlElement(name = "Tag")
+    protected List<String> tags;
+
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -101,11 +112,11 @@ public class TestCase {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -113,11 +124,11 @@ public class TestCase {
 
     /**
      * Gets the value of the description property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDescription() {
         return description;
@@ -125,11 +136,11 @@ public class TestCase {
 
     /**
      * Sets the value of the description property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDescription(String value) {
         this.description = value;
@@ -137,11 +148,11 @@ public class TestCase {
 
     /**
      * Gets the value of the group property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getGroup() {
         return group;
@@ -149,11 +160,11 @@ public class TestCase {
 
     /**
      * Sets the value of the group property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setGroup(String value) {
         this.group = value;
@@ -161,11 +172,11 @@ public class TestCase {
 
     /**
      * Gets the value of the dateType property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDateType() {
         return dateType;
@@ -173,11 +184,11 @@ public class TestCase {
 
     /**
      * Sets the value of the dateType property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDateType(String value) {
         this.dateType = value;
@@ -185,11 +196,11 @@ public class TestCase {
 
     /**
      * Gets the value of the metaData property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link MetaDataType }
-     *     
+     *
      */
     public MetaDataType getMetaData() {
         return metaData;
@@ -197,11 +208,11 @@ public class TestCase {
 
     /**
      * Sets the value of the metaData property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link MetaDataType }
-     *     
+     *
      */
     public void setMetaData(MetaDataType value) {
         this.metaData = value;
@@ -209,11 +220,11 @@ public class TestCase {
 
     /**
      * Gets the value of the assessmentDate property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link DateType }
-     *     
+     *
      */
     public DateType getAssessmentDate() {
         return assessmentDate;
@@ -221,11 +232,11 @@ public class TestCase {
 
     /**
      * Sets the value of the assessmentDate property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link DateType }
-     *     
+     *
      */
     public void setAssessmentDate(DateType value) {
         this.assessmentDate = value;
@@ -233,11 +244,11 @@ public class TestCase {
 
     /**
      * Gets the value of the patient property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link PatientType }
-     *     
+     *
      */
     public PatientType getPatient() {
         return patient;
@@ -245,11 +256,11 @@ public class TestCase {
 
     /**
      * Sets the value of the patient property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link PatientType }
-     *     
+     *
      */
     public void setPatient(PatientType value) {
         this.patient = value;
@@ -257,11 +268,11 @@ public class TestCase {
 
     /**
      * Gets the value of the events property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link EventsType }
-     *     
+     *
      */
     public EventsType getEvents() {
         return events;
@@ -269,11 +280,11 @@ public class TestCase {
 
     /**
      * Sets the value of the events property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link EventsType }
-     *     
+     *
      */
     public void setEvents(EventsType value) {
         this.events = value;
@@ -281,11 +292,11 @@ public class TestCase {
 
     /**
      * Gets the value of the forecasts property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ForecastsType }
-     *     
+     *
      */
     public ForecastsType getForecasts() {
         return forecasts;
@@ -293,11 +304,11 @@ public class TestCase {
 
     /**
      * Sets the value of the forecasts property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ForecastsType }
-     *     
+     *
      */
     public void setForecasts(ForecastsType value) {
         this.forecasts = value;
@@ -305,11 +316,11 @@ public class TestCase {
 
     /**
      * Gets the value of the uid property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUID() {
         return uid;
@@ -317,14 +328,121 @@ public class TestCase {
 
     /**
      * Sets the value of the uid property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUID(String value) {
         this.uid = value;
     }
 
+    /**
+     * Gets the value of the workflow tag property.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     possible values are
+     *     - Suggested
+     *     - Deleted
+     *     - On hold
+     *     - Final
+     *
+     */
+    public String getWorkflowTag() {
+        return workflowTag;
+    }
+
+    /**
+     * Sets the value of the workflow-tag property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     allowed values are
+     *     - Suggested
+     *     - Deleted
+     *     - On hold
+     *     - Final
+     *
+     */
+    public void setWorkflowTag(String value) {
+        this.workflowTag = value;
+    }
+
+    /**
+     * Gets the value of the Tags property.
+     *
+     * @return
+     *     possible object is
+     *     {@link List<String> }
+     *
+     */
+    public List<String> getTags() {
+        return tags;
+    }
+
+    /**
+     * Sets the value of the Tags property.
+     *
+     * @return
+     *     allowed object is
+     *     {@link List<String> }
+     *
+     */
+    public void setTags(List<String> values) {
+        this.tags = values;
+    }
+
+    /**
+     * Gets the value of the forecastType property.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getForecastType() {
+        return forecastType;
+    }
+
+
+    /**
+     * Sets the value of the forecastType property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setForecastType(String value) {
+        this.forecastType = value;
+    }
+
+
+    /**
+     * Gets the value of the evaluationType property.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getEvaluationType() {
+        return evaluationType;
+    }
+
+    /**
+     * Sets the value of the evaluationType property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setEvaluationType(String value) {
+        this.evaluationType = value;
+    }
 }

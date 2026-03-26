@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -26,27 +27,17 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import gov.nist.healthcare.cds.domain.*;
+import gov.nist.healthcare.cds.domain.TestCase;
+import gov.nist.healthcare.cds.domain.xml.beans.DateType;
+import gov.nist.healthcare.cds.domain.xml.beans.EventType;
+import gov.nist.healthcare.cds.enumeration.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import gov.nist.healthcare.cds.domain.Date;
-import gov.nist.healthcare.cds.domain.Event;
-import gov.nist.healthcare.cds.domain.ExpectedEvaluation;
-import gov.nist.healthcare.cds.domain.ExpectedForecast;
-import gov.nist.healthcare.cds.domain.FixedDate;
-import gov.nist.healthcare.cds.domain.Injection;
-import gov.nist.healthcare.cds.domain.Patient;
-import gov.nist.healthcare.cds.domain.Product;
-import gov.nist.healthcare.cds.domain.RelativeDate;
-import gov.nist.healthcare.cds.domain.RelativeDateRule;
-import gov.nist.healthcare.cds.domain.StaticDateReference;
-import gov.nist.healthcare.cds.domain.TestCase;
-import gov.nist.healthcare.cds.domain.VaccinationEvent;
-import gov.nist.healthcare.cds.domain.Vaccine;
-import gov.nist.healthcare.cds.domain.VaccineDateReference;
 import gov.nist.healthcare.cds.domain.exception.ConfigurationException;
 import gov.nist.healthcare.cds.domain.exception.ProductNotFoundException;
 import gov.nist.healthcare.cds.domain.exception.VaccineNotFoundException;
@@ -57,12 +48,6 @@ import gov.nist.healthcare.cds.domain.wrapper.MetaData;
 import gov.nist.healthcare.cds.domain.wrapper.TransformResult;
 import gov.nist.healthcare.cds.domain.xml.ErrorModel;
 import gov.nist.healthcare.cds.domain.xml.beans.*;
-import gov.nist.healthcare.cds.enumeration.DatePosition;
-import gov.nist.healthcare.cds.enumeration.EvaluationReason;
-import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
-import gov.nist.healthcare.cds.enumeration.Gender;
-import gov.nist.healthcare.cds.enumeration.RelativeTo;
-import gov.nist.healthcare.cds.enumeration.SerieStatus;
 import gov.nist.healthcare.cds.repositories.ProductRepository;
 import gov.nist.healthcare.cds.repositories.VaccineRepository;
 import gov.nist.healthcare.cds.service.FormatService;
@@ -73,16 +58,16 @@ public class NISTFormatServiceImpl implements FormatService {
 
 	@Autowired
 	private VaccineRepository vaccineRepository;
-	
+
 	@Autowired
 	private ProductRepository productRepository;
-	
+
 	@Autowired
 	private MetaDataService mdService;
-	
-	
+
+
 	final String W3C_XML_SCHEMA_NS_URI = "http://www.w3.org/2001/XMLSchema";
-	
+
 	public InputStream export(TestCase tc, ExportConfig config) {
 		try {
 			gov.nist.healthcare.cds.domain.xml.beans.TestCase tcp = new gov.nist.healthcare.cds.domain.xml.beans.TestCase();
@@ -95,15 +80,16 @@ public class NISTFormatServiceImpl implements FormatService {
 			}
 			if(tc.getUid() != null && !tc.getUid().isEmpty())
 				tcp.setUID(tc.getUid());
-			
+
 			MetaDataType mdt = new MetaDataType();
 			if(tc.getMetaData() != null){
 				MetaData md = tc.getMetaData();
 				mdt.setVersion(md.getVersion());
 				mdt.setDateCreated(date(md.getDateCreated()));
 				mdt.setDateLastUpdated(date(md.getDateLastUpdated()));
+				mdt.setChangeLog(md.getChangeLog());
 			}
-			
+
 			PatientType pt = new PatientType();
 			if(tc.getPatient() != null){
 				Patient p = tc.getPatient();
@@ -115,7 +101,7 @@ public class NISTFormatServiceImpl implements FormatService {
 				}
 				pt.setDateOfBirth(date(p.getDob()));
 			}
-			
+
 			List<Event> evts = tc.getEvents();
 			if(evts != null && evts.size() > 0){
 				EventsType evtst = new EventsType();
@@ -125,7 +111,7 @@ public class NISTFormatServiceImpl implements FormatService {
 					evt.setEventDate(date(e.getDate()));
 					VaccinationEvent vev = (VaccinationEvent) e;
 					evt.setID(vev.getPosition());
-					
+
 					VaccineType vt = new VaccineType();
 					Injection inject = vev.getAdministred();
 					if(inject instanceof Vaccine){
@@ -139,27 +125,27 @@ public class NISTFormatServiceImpl implements FormatService {
 						vt.setMvx(v.getMx().getMvx());
 						vt.setName(v.getName());
 					}
-					
+
 					evt.setAdministred(vt);
-					
+
 					Set<ExpectedEvaluation> evals = vev.getEvaluations();
 					EvaluationsType evalst = new EvaluationsType();
 					for(ExpectedEvaluation exe : evals){
 						EvaluationType et = new EvaluationType();
 						et.setStatus(toXMLStatus(exe.getStatus()));
-						
+
 						if(exe.getReason() != null){
 							EvaluationReasonType evrt = new EvaluationReasonType();
 							evrt.setCode(exe.getReason().name());
 							evrt.setValue(exe.getReason().getDetails());
 							et.setEvaluationReason(evrt);
 						}
-						
+
 						VaccineType vte = new VaccineType();
 						vte.setCvx(exe.getRelatedTo().getCvx());
 						vte.setName(exe.getRelatedTo().getName());
 						et.setVaccine(vte);
-						
+
 						evalst.getEvaluation().add(et);
 					}
 					evt.setEvaluations(evalst);
@@ -167,10 +153,10 @@ public class NISTFormatServiceImpl implements FormatService {
 				}
 				tcp.setEvents(evtst);
 			}
-			
+
 			List<ExpectedForecast> efs = tc.getForecast();
 			if(efs != null && efs.size() > 0){
-				ForecastsType fts = new ForecastsType();				
+				ForecastsType fts = new ForecastsType();
 				for(ExpectedForecast ef : efs){
 					ForecastType ft = new ForecastType();
 					ft.setEarliest(date(ef.getEarliest()));
@@ -179,39 +165,53 @@ public class NISTFormatServiceImpl implements FormatService {
 					ft.setLatest(date(ef.getComplete()));
 					ft.setForecastReason(ef.getForecastReason());
 					ft.setDoseNumber(ef.getDoseNumber());
-					
+
 					if(ef.getSerieStatus() != null){
 						SerieStatusType sst = new SerieStatusType();
 						sst.setCode(ef.getSerieStatus().toString());
 						sst.setDetails(ef.getSerieStatus().getDetails());
-						
+
 						ft.setSerieStatus(sst);
 					}
-					
+
 					VaccineType vt = new VaccineType();
 					vt.setCvx(ef.getTarget().getCvx());
 					vt.setName(ef.getTarget().getName());
-					
+
 					ft.setTarget(vt);
 					fts.getForecast().add(ft);
-				}			
+				}
 				tcp.setForecasts(fts);
 			}
 
-			
+			if (tc.getTags() != null) {
+				List<String> mdtTags = tc.getTags().stream().map(Tag::getText).collect(Collectors.toList());
+				tcp.setTags(mdtTags);
+			}
+			if (tc.getWorkflowTag() != null) {
+				tcp.setWorkflowTag(tc.getWorkflowTag().toString());
+			}
+			if (tc.getForecastType() != null) {
+				tcp.setForecastType(tc.getForecastType());
+			}
+			if (tc.getEvaluationType() != null) {
+				tcp.setEvaluationType(tc.getEvaluationType());
+			}
+
+
 			tcp.setPatient(pt);
 			tcp.setMetaData(mdt);
-			
-			
+
+
 			return this.objToString(tcp);
 		}
 		catch(Exception e){
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	
+
 	private String eventType(Event e) {
 		if(e instanceof VaccinationEvent)
 			return "VACCINATION";
@@ -227,10 +227,10 @@ public class NISTFormatServiceImpl implements FormatService {
 		            gregory);
 		return calendar;
 	}
-	
+
 	public DateType date(Date d) throws DatatypeConfigurationException{
 		DateType dt = new DateType();
-		
+
 		if(d instanceof FixedDate){
 			FixedDate fd = (FixedDate) d;
 			FixedDateType fdt = new FixedDateType();
@@ -261,7 +261,7 @@ public class NISTFormatServiceImpl implements FormatService {
 		}
 		return dt;
 	}
-	
+
 	public Date date(DateType d) throws DatatypeConfigurationException{
 		if(d.getFixed() != null){
 			FixedDateType fd = d.getFixed();
@@ -292,7 +292,7 @@ public class NISTFormatServiceImpl implements FormatService {
 		}
 		return null;
 	}
-	
+
 	private ByteArrayInputStream objToString(gov.nist.healthcare.cds.domain.xml.beans.TestCase r)
 			throws JAXBException, UnsupportedEncodingException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -304,7 +304,7 @@ public class NISTFormatServiceImpl implements FormatService {
 		m.marshal(r, baos);
 		return new ByteArrayInputStream(baos.toByteArray());
 	}
-	
+
 	private gov.nist.healthcare.cds.domain.xml.beans.TestCase stringToObj(InputStream r)
 			throws JAXBException {
 		JAXBContext jc = JAXBContext
@@ -336,16 +336,17 @@ public class NISTFormatServiceImpl implements FormatService {
 			else {
 				tc.setUid("");
 			}
-			
+
 			MetaData md;
 			if(tcp.getMetaData() != null){
 				MetaDataType mdt = tcp.getMetaData();
 				md = mdService.create(true,mdt.getVersion());
+				md.setChangeLog(mdt.getChangeLog());
 			}
 			else {
 				md = mdService.create(true);
 			}
-			
+
 			Patient p = new Patient();
 			if(tcp.getPatient() != null){
 				PatientType pt = tcp.getPatient();
@@ -357,17 +358,17 @@ public class NISTFormatServiceImpl implements FormatService {
 				}
 				p.setDob(date(pt.getDateOfBirth()));
 			}
-			
+
 			EventsType evts = tcp.getEvents();
 			List<Event> evs = new ArrayList<Event>();
-			
+
 			if(evts != null){
 				List<EventType> etl = evts.getEvent();
 				for(EventType e : etl){
 					VaccinationEvent vev = new VaccinationEvent();
 					vev.setPosition(e.getID());
 					vev.setDate(date(e.getEventDate()));
-					
+
 					if(e.getAdministred().getMvx() != null && !e.getAdministred().getMvx().isEmpty()){
 						Product pr = productRepository.getProduct(e.getAdministred().getMvx(), e.getAdministred().getCvx());
 						if(pr != null){
@@ -384,7 +385,7 @@ public class NISTFormatServiceImpl implements FormatService {
 							throw new VaccineNotFoundException(e.getAdministred().getCvx());
 						}
 					}
-					
+
 					Set<ExpectedEvaluation> evals = new HashSet<ExpectedEvaluation>();
 					EvaluationsType evalst = e.getEvaluations();
 					if(evalst != null){
@@ -392,27 +393,27 @@ public class NISTFormatServiceImpl implements FormatService {
 						for(EvaluationType exe : evtl){
 							ExpectedEvaluation expe = new ExpectedEvaluation();
 							expe.setStatus(fromXMLStatus(exe.getStatus()));
-							
+
 							if(exe.getEvaluationReason() != null){
 								expe.setReason(EvaluationReason.valueOf(exe.getEvaluationReason().getCode()));
 							}
-							
+
 							Vaccine vte = vaccineRepository.findOne(exe.getVaccine().getCvx());
 							if(vte != null){
 								expe.setRelatedTo(vte);
 							} else {
 								throw new VaccineNotFoundException(exe.getVaccine().getCvx());
 							}
-							
+
 							evals.add(expe);
 						}
 					}
-					
+
 					vev.setEvaluations(evals);
 					evs.add(vev);
 				}
 			}
-			
+
 			List<ExpectedForecast> efs = new ArrayList<ExpectedForecast>();
 			ForecastsType fts = tcp.getForecasts();
 			if(fts != null){
@@ -439,12 +440,25 @@ public class NISTFormatServiceImpl implements FormatService {
 					efs.add(ef);
 				}
 			}
-			
+
+			if (tcp.getTags() != null) {
+				tc.setTags(tcp.getTags().stream().map(Tag::new).collect(Collectors.toList()));
+			}
+			if (tcp.getWorkflowTag() != null && !tcp.getWorkflowTag().isEmpty()) {
+				tc.setWorkflowTag(WorkflowTag.valueOf(tcp.getWorkflowTag()));
+			}
+			if (tcp.getForecastType() != null && !tcp.getForecastType().isEmpty()) {
+				tc.setForecastType(tcp.getForecastType());
+			}
+			if (tcp.getEvaluationType() != null && !tcp.getEvaluationType().isEmpty()) {
+				tc.setEvaluationType(tcp.getEvaluationType());
+			}
+
 			tc.setPatient(p);
 			tc.setMetaData(md);
 			tc.setForecast(efs);
 			tc.setEvents(evs);
-			
+
 			 transform.add(tc);
 		}
 		catch(VaccineNotFoundException v){
@@ -452,18 +466,18 @@ public class NISTFormatServiceImpl implements FormatService {
 		}
 		catch(ProductNotFoundException p){
 			transform.add(new ErrorModel(0,0,"Product", "Product not found in database cvx : "+p.getCvx()+" mvx : "+p.getMvx()));
-		} 
+		}
 		catch (DatatypeConfigurationException e) {
 			transform.add(new ErrorModel(0,0,"Date", "Invalid Date Format"));
 		} catch (JAXBException e1) {
 			transform.add(new ErrorModel(0,0,"File Format", "Invalid File Format"));
 		}
-		
+
 		transform.setTotalTC(1);
 		return transform;
-		
+
 	}
-	
+
 	public StatusType toXMLStatus(EvaluationStatus es){
 		switch(es){
 		case VALID : return StatusType.VALID;
@@ -473,7 +487,7 @@ public class NISTFormatServiceImpl implements FormatService {
 		default : return null;
 		}
 	}
-	
+
 	public EvaluationStatus fromXMLStatus(StatusType es){
 		switch(es){
 		case VALID : return EvaluationStatus.VALID;
@@ -492,7 +506,7 @@ public class NISTFormatServiceImpl implements FormatService {
 			Schema schema;
 			schema = factory.newSchema(new StreamSource(schu));
 			Validator validator = schema.newValidator();
-			
+
 			final ArrayList<ErrorModel> errors = new ArrayList<ErrorModel>();
 			validator.setErrorHandler(new ErrorHandler() {
 				@Override
@@ -500,13 +514,13 @@ public class NISTFormatServiceImpl implements FormatService {
 						throws SAXException {
 					errors.add(new ErrorModel(exception));
 				}
-	
+
 				@Override
 				public void fatalError(SAXParseException exception)
 						throws SAXException {
 					errors.add(new ErrorModel(exception));
 				}
-	
+
 				@Override
 				public void error(SAXParseException exception)
 						throws SAXException {
@@ -543,14 +557,14 @@ public class NISTFormatServiceImpl implements FormatService {
 	public ExportResult exportToFile(List<TestCase> tcs, ExportConfig config) throws ConfigurationException {
 		ExportResult exportResult = new ExportResult();
 		List<String> names = new ArrayList<>();
-		
+
 		for(TestCase tc : tcs){
 			String name = tc.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 			exportResult.add(findName(name, names)+".xml",this.export(tc, config));
 		}
 		return exportResult;
 	}
-	
+
 	public String findName(String str, List<String> names){
 		if(names.contains(str)){
 			return findName(str+"_1", names);
