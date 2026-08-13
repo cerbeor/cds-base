@@ -19,4 +19,8 @@ public interface ReportRepository extends MongoRepository<Report, String>{
 	public List<Report> reportsForTestCase(String tcId, String user);
 	
 	public List<Report> findByUser(String user);
+
+	/** Every report, carrying only its owner : used to count reports per user without loading them. */
+	@Query(value = "{ 'user' : { $exists : true } }", fields = "{ 'user' : 1 }")
+	public List<Report> reportOwners();
 }
