@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Assert;
@@ -356,6 +357,68 @@ public class MongoExaminationServiceTest {
 
 		Assert.assertEquals(Arrays.asList("bob@test.com", "alice@test.com", "zoe@test.com", "orphan@test.com"),
 				emails(contacts));
+	}
+
+	// --- Whitelist ---
+
+	@Test
+	public void findUsersToContact_dropsWhitelistedUsernamesAndEmails() {
+		Mockito.when(accountRepository.findAll()).thenReturn(Arrays.asList(
+				createAccount("admin", "admin@test.com", "NIST"),
+				createAccount("partner", "partner@test.com", "CDC"),
+				createAccount("dormant", "dormant@test.com", "ACME")
+		));
+		Mockito.when(testPlanRepository.findAll()).thenReturn(Arrays.asList(
+				createTestPlan("tp1", "admin", false),
+				createTestPlan("tp2", "partner", false),
+				createTestPlan("tp3", "dormant", false)
+		));
+
+		List<UserContact> contacts = examinationService.findUsersToContact(
+				new HashSet<>(Arrays.asList("admin")),
+				new HashSet<>(Arrays.asList("partner@test.com"))
+		);
+
+		Assert.assertEquals(Arrays.asList("dormant"), usernames(contacts));
+	}
+
+	@Test
+	public void findUsersToContact_emptyWhitelistsChangeNothing() {
+		Mockito.when(accountRepository.findAll()).thenReturn(Arrays.asList(
+				createAccount("dormant", "dormant@test.com", "ACME")
+		));
+		Mockito.when(testPlanRepository.findAll()).thenReturn(Arrays.asList(
+				createTestPlan("tp1", "dormant", false)
+		));
+
+		List<UserContact> contacts = examinationService.findUsersToContact(
+				Collections.<String>emptySet(),
+				Collections.<String>emptySet()
+		);
+
+		Assert.assertEquals(Arrays.asList("dormant"), usernames(contacts));
+	}
+
+	@Test
+	public void findUsersToContact_whitelistHonoursTheInactivityWindow() {
+		Mockito.when(accountRepository.findAll()).thenReturn(Arrays.asList(
+				createAccount("admin", "admin@test.com", "NIST"),
+				createAccount("dormant", "dormant@test.com", "ACME")
+		));
+		Mockito.when(testPlanRepository.findAll()).thenReturn(Arrays.asList(
+				createTestPlan("tp1", "admin", false),
+				createTestPlan("tp2", "dormant", false)
+		));
+		Mockito.when(userMetadataRepository.findAll()).thenReturn(Arrays.asList(
+				createMetadata("dormant", yearsAgo(4))
+		));
+
+		List<UserContact> contacts = examinationService.findUsersToContact(
+				3, new HashSet<>(Arrays.asList("admin")), Collections.<String>emptySet());
+
+		Assert.assertEquals(Arrays.asList("dormant"), usernames(contacts));
+		Assert.assertTrue(examinationService.findUsersToContact(
+				5, new HashSet<>(Arrays.asList("admin")), Collections.<String>emptySet()).isEmpty());
 	}
 
 	@Test

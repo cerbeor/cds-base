@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +84,32 @@ public class MongoExaminationService {
 	 */
 	public List<UserContact> findUsersToContact() {
 		return findUsersToContact(ACTIVITY_WINDOW_YEARS);
+	}
+
+	/**
+	 * The outreach list, without the users that a cleanup would spare anyway. Whitelisting
+	 * works exactly as in {@link SimpleDatabaseCleanupService#cleanDatabase(Set, Set)} : a
+	 * user is whitelisted when their username or their email is listed, and their data is
+	 * kept whatever they answer, so there is nothing to ask them.
+	 */
+	public List<UserContact> findUsersToContact(Set<String> whitelistedUsernames, Set<String> whitelistedEmails) {
+		return findUsersToContact(ACTIVITY_WINDOW_YEARS, whitelistedUsernames, whitelistedEmails);
+	}
+
+	/**
+	 * Same as {@link #findUsersToContact(Set, Set)} with an explicit inactivity window.
+	 */
+	public List<UserContact> findUsersToContact(int inactiveForYears, Set<String> whitelistedUsernames,
+			Set<String> whitelistedEmails) {
+		List<UserContact> contacts = new ArrayList<>();
+		for (UserContact contact : findUsersToContact(inactiveForYears)) {
+			if (!isWhitelisted(contact, whitelistedUsernames, whitelistedEmails)) {
+				contacts.add(contact);
+			}
+		}
+
+		logger.info("Examination: {} users to contact once the whitelist is applied", contacts.size());
+		return contacts;
 	}
 
 	/**
@@ -243,6 +270,15 @@ public class MongoExaminationService {
 
 	private boolean isShared(TestPlan tp) {
 		return tp.isPublic() || (tp.getViewers() != null && !tp.getViewers().isEmpty());
+	}
+
+	/** Whitelisted by username or by email, as {@link SimpleDatabaseCleanupService} does it. */
+	private boolean isWhitelisted(UserContact contact, Set<String> whitelistedUsernames,
+			Set<String> whitelistedEmails) {
+		if (contact.getUsername() != null && whitelistedUsernames.contains(contact.getUsername())) {
+			return true;
+		}
+		return contact.getEmail() != null && whitelistedEmails.contains(contact.getEmail());
 	}
 
 	private boolean isActiveSince(UserContact contact, Date since) {
