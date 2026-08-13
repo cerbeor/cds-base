@@ -239,7 +239,7 @@ public class MongoExaminationServiceTest {
 	// --- The outreach list ---
 
 	@Test
-	public void findUsersToContact_keepsOwnersOfDataWhoAreNoLongerActive() {
+	public void findUsersToContact_keepsOwnersOfDataAndRecentlyActiveUsers() {
 		Mockito.when(accountRepository.findAll()).thenReturn(Arrays.asList(
 				createAccount("dormantOwner", "dormant@test.com", "ACME"),
 				createAccount("neverActiveOwner", "never@test.com", "ACME"),
@@ -259,7 +259,24 @@ public class MongoExaminationServiceTest {
 
 		List<UserContact> contacts = examinationService.findUsersToContact();
 
-		Assert.assertEquals(Arrays.asList("dormantOwner", "neverActiveOwner"), usernames(contacts));
+		Assert.assertEquals(Arrays.asList("activeOwner", "dormantOwner", "neverActiveOwner"), usernames(contacts));
+	}
+
+	@Test
+	public void findUsersToContact_keepsRecentlyActiveUsersEvenWithoutData() {
+		Mockito.when(accountRepository.findAll()).thenReturn(Arrays.asList(
+				createAccount("activeButEmpty", "active@test.com", "NIST"),
+				createAccount("dormantAndEmpty", "dormant@test.com", "ACME")
+		));
+		Mockito.when(userMetadataRepository.findAll()).thenReturn(Arrays.asList(
+				createMetadata("activeButEmpty", yearsAgo(1)),
+				createMetadata("dormantAndEmpty", yearsAgo(5))
+		));
+
+		List<UserContact> contacts = examinationService.findUsersToContact();
+
+		Assert.assertEquals(Arrays.asList("activeButEmpty"), usernames(contacts));
+		Assert.assertFalse(byUsername(contacts, "activeButEmpty").ownsData());
 	}
 
 	@Test
@@ -400,29 +417,46 @@ public class MongoExaminationServiceTest {
 	}
 
 	@Test
-	public void findUsersToContact_whitelistHonoursTheInactivityWindow() {
+	public void findUsersToContact_whitelistHonoursTheActivityWindow() {
 		Mockito.when(accountRepository.findAll()).thenReturn(Arrays.asList(
 				createAccount("admin", "admin@test.com", "NIST"),
-				createAccount("dormant", "dormant@test.com", "ACME")
-		));
-		Mockito.when(testPlanRepository.findAll()).thenReturn(Arrays.asList(
-				createTestPlan("tp1", "admin", false),
-				createTestPlan("tp2", "dormant", false)
+				createAccount("lurker", "lurker@test.com", "ACME")
 		));
 		Mockito.when(userMetadataRepository.findAll()).thenReturn(Arrays.asList(
-				createMetadata("dormant", yearsAgo(4))
+				createMetadata("admin", yearsAgo(1)),
+				createMetadata("lurker", yearsAgo(4))
 		));
 
-		List<UserContact> contacts = examinationService.findUsersToContact(
-				3, new HashSet<>(Arrays.asList("admin")), Collections.<String>emptySet());
-
-		Assert.assertEquals(Arrays.asList("dormant"), usernames(contacts));
+		// admin is active but whitelisted, lurker sits outside the window
 		Assert.assertTrue(examinationService.findUsersToContact(
-				5, new HashSet<>(Arrays.asList("admin")), Collections.<String>emptySet()).isEmpty());
+				3, new HashSet<>(Arrays.asList("admin")), Collections.<String>emptySet()).isEmpty());
+
+		// a wider window brings lurker in, admin stays whitelisted out
+		List<UserContact> contacts = examinationService.findUsersToContact(
+				5, new HashSet<>(Arrays.asList("admin")), Collections.<String>emptySet());
+
+		Assert.assertEquals(Arrays.asList("lurker"), usernames(contacts));
+	}
+
+	/**
+	 * The window only decides users who own nothing : a wider window brings more of them in.
+	 * Owners of data are on the list whatever the window, see the test below.
+	 */
+	@Test
+	public void findUsersToContact_honoursAnExplicitActivityWindow() {
+		Mockito.when(accountRepository.findAll()).thenReturn(Arrays.asList(
+				createAccount("emptyAccount", "empty@test.com", "ACME")
+		));
+		Mockito.when(userMetadataRepository.findAll()).thenReturn(Arrays.asList(
+				createMetadata("emptyAccount", yearsAgo(4))
+		));
+
+		Assert.assertTrue(examinationService.findUsersToContact(3).isEmpty());
+		Assert.assertEquals(1, examinationService.findUsersToContact(5).size());
 	}
 
 	@Test
-	public void findUsersToContact_honoursAnExplicitInactivityWindow() {
+	public void findUsersToContact_keepsOwnersOfDataWhateverTheWindow() {
 		Mockito.when(accountRepository.findAll()).thenReturn(Arrays.asList(
 				createAccount("owner", "owner@test.com", "ACME")
 		));
@@ -430,11 +464,12 @@ public class MongoExaminationServiceTest {
 				createTestPlan("tp1", "owner", false)
 		));
 		Mockito.when(userMetadataRepository.findAll()).thenReturn(Arrays.asList(
-				createMetadata("owner", yearsAgo(4))
+				createMetadata("owner", yearsAgo(20))
 		));
 
+		Assert.assertEquals(1, examinationService.findUsersToContact(1).size());
 		Assert.assertEquals(1, examinationService.findUsersToContact(3).size());
-		Assert.assertTrue(examinationService.findUsersToContact(5).isEmpty());
+		Assert.assertEquals(1, examinationService.findUsersToContact(50).size());
 	}
 
 	@Test

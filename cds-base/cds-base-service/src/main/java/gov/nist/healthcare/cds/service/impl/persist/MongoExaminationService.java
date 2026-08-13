@@ -70,12 +70,15 @@ public class MongoExaminationService {
 
 	/**
 	 * The outreach list : emails and organizations to contact to assert whether they
-	 * want to keep their data. A user is on it when both are true :
+	 * want to keep their data. A user is on it when either is true :
 	 *
 	 * - they own something a cleanup would drop, that is at least one test plan,
 	 *   software configuration, report or validation job ;
-	 * - they made no API call in the last {@value #ACTIVITY_WINDOW_YEARS} years, so their
-	 *   intent cannot be inferred from recent usage.
+	 * - they made an API call within the last {@value #ACTIVITY_WINDOW_YEARS} years, so the
+	 *   account is still in use even if it holds nothing yet.
+	 *
+	 * Only accounts that are both empty and silent are left out : a cleanup drops nothing
+	 * of theirs, so there is nothing to ask them.
 	 *
 	 * Entries flagged with {@link UserContact#isOwnsSharedTestPlans()} should be handled
 	 * first : their data is public or shared, so dropping it also impacts other users.
@@ -120,12 +123,12 @@ public class MongoExaminationService {
 
 		List<UserContact> contacts = new ArrayList<>();
 		for (UserContact contact : snapshot()) {
-			if (contact.ownsData() && !isActiveSince(contact, cutoff)) {
+			if (contact.ownsData() || isActiveSince(contact, cutoff) || contact.isOwnsSharedTestPlans()) {
 				contacts.add(contact);
 			}
 		}
 
-		logger.info("Examination: {} users to contact (owning data, inactive for {} years)",
+		logger.info("Examination: {} users to contact (owning data, or active within {} years)",
 				contacts.size(), inactiveForYears);
 		return sorted(contacts);
 	}
