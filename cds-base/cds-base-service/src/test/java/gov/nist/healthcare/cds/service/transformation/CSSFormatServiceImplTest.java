@@ -5,6 +5,7 @@ import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtur
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.MMR_NAME;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.bytes;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.completeTestCase;
+import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.createdMetaData;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.exportConfig;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.fixed;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.forecast;
@@ -14,6 +15,7 @@ import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtur
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.metaData;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.product;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.relativeToBirth;
+import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.richTestCase;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.vaccination;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.vaccine;
 
@@ -53,6 +55,7 @@ import gov.nist.healthcare.cds.domain.ExpectedEvaluation;
 import gov.nist.healthcare.cds.domain.ExpectedForecast;
 import gov.nist.healthcare.cds.domain.FixedDate;
 import gov.nist.healthcare.cds.domain.Injection;
+import gov.nist.healthcare.cds.domain.Product;
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.VaccinationEvent;
 import gov.nist.healthcare.cds.domain.Vaccine;
@@ -148,10 +151,11 @@ public class CSSFormatServiceImplTest {
 		MockitoAnnotations.initMocks(this);
 		mmr = vaccine(MMR_CVX, MMR_NAME);
 
+		// stands in for SimpleMetaDataService : a fresh instance stamped with the import date
 		Mockito.when(mdService.create(Mockito.anyBoolean())).thenAnswer(new Answer<MetaData>() {
 			@Override
 			public MetaData answer(InvocationOnMock invocation) {
-				return metaData(null, null);
+				return createdMetaData("1.0");
 			}
 		});
 		// the MMR cvx is a group of its own, and is known by that name on both sides
@@ -549,6 +553,51 @@ public class CSSFormatServiceImplTest {
 		TransformResult result = formatService.importFromFile(spreadsheet, importAll());
 
 		Assert.assertEquals("1.0", result.getTestCases().get(0).getMetaData().getVersion());
+	}
+
+	/**
+	 * What the CDC layout costs, spelled out : the sheet has no column for a good part of a test
+	 * case, so a round trip through it is lossy by construction. The list below is the whole of
+	 * it for a fully populated test case, and anything new that goes missing shows up here.
+	 *
+	 * Only the losses are surprising, not their presence : this test is here so that the price
+	 * of the format stays a known, reviewed list rather than a discovery made in production.
+	 */
+	@Test
+	public void exportToFile_thenImportFromFile_dropsWhatTheCdcSheetHasNoColumnFor() throws Exception {
+		Mockito.when(vaxService.getVax(Mockito.any(VaccineRef.class), Mockito.anyBoolean()))
+				.thenAnswer(administredInjection());
+
+		TestCase original = richTestCase();
+		ExportResult exported = formatService.exportToFile(list(original), exportConfig());
+		InputStream spreadsheet = new ByteArrayInputStream(bytes(exported.getReader().get(0).getIn()));
+
+		TransformResult result = formatService.importFromFile(spreadsheet, importAll());
+
+		Assert.assertTrue(messages(result.getErrors()).toString(), result.getErrors().isEmpty());
+		Assert.assertEquals(Arrays.asList(
+				"workflowTag: FINAL -> <none>",
+				"tags: [regression, mmr] -> <none>",
+				"metaData.version: 7.3 -> 1.0",
+				"events[0].position: 1 -> 0",
+				"events[0].doseNumber: 1 -> 0",
+				"events[1].position: 2 -> 1",
+				"events[1].doseNumber: 2 -> 0",
+				"forecast[0].forecastReason: Series in progress -> <none>",
+				"forecast[0].complete: 04/01/2011 -> <none>"),
+				TestCaseDiff.differences(original, result.getTestCases().get(0)));
+	}
+
+	/** Resolves the administred injection from the cvx and mvx the sheet holds, as the real service does. */
+	private Answer<Injection> administredInjection() {
+		final Product mmrII = product("MMR-II", mmr, MERCK_MVX, "M-M-R II");
+		return new Answer<Injection>() {
+			@Override
+			public Injection answer(InvocationOnMock invocation) {
+				VaccineRef ref = (VaccineRef) invocation.getArguments()[0];
+				return MERCK_MVX.equals(ref.getMvx()) ? mmrII : mmr;
+			}
+		};
 	}
 
 	// --- Pre conditions ---

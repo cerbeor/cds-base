@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import gov.nist.healthcare.cds.domain.Date;
+import gov.nist.healthcare.cds.domain.DateReference;
 import gov.nist.healthcare.cds.domain.Event;
 import gov.nist.healthcare.cds.domain.ExpectedEvaluation;
 import gov.nist.healthcare.cds.domain.ExpectedForecast;
@@ -23,9 +24,11 @@ import gov.nist.healthcare.cds.domain.Product;
 import gov.nist.healthcare.cds.domain.RelativeDate;
 import gov.nist.healthcare.cds.domain.RelativeDateRule;
 import gov.nist.healthcare.cds.domain.StaticDateReference;
+import gov.nist.healthcare.cds.domain.Tag;
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.VaccinationEvent;
 import gov.nist.healthcare.cds.domain.Vaccine;
+import gov.nist.healthcare.cds.domain.VaccineDateReference;
 import gov.nist.healthcare.cds.domain.wrapper.ExportConfig;
 import gov.nist.healthcare.cds.domain.wrapper.ImportConfig;
 import gov.nist.healthcare.cds.domain.wrapper.MetaData;
@@ -36,6 +39,7 @@ import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
 import gov.nist.healthcare.cds.enumeration.Gender;
 import gov.nist.healthcare.cds.enumeration.RelativeTo;
 import gov.nist.healthcare.cds.enumeration.SerieStatus;
+import gov.nist.healthcare.cds.enumeration.WorkflowTag;
 
 /**
  * Test cases and building blocks shared by the {@link gov.nist.healthcare.cds.service.FormatService}
@@ -46,6 +50,9 @@ final class FormatServiceFixtures {
 	static final String MMR_CVX = "03";
 	static final String MMR_NAME = "MMR";
 	static final String MERCK_MVX = "MSD";
+
+	/** Stands in for the 'now' a real MetaDataService stamps on an imported test case. */
+	static final java.util.Date IMPORTED_ON = utilDate("09/30/2020");
 
 	private FormatServiceFixtures() {
 	}
@@ -75,6 +82,60 @@ final class FormatServiceFixtures {
 		return tc;
 	}
 
+	/**
+	 * A test case with every field a format could carry filled in with a distinctive value :
+	 * two vaccinations, one of them a product, an evaluation reason, a forecast with all four
+	 * dates and a reason, tags and a workflow tag. Handed to the round trip tests so that
+	 * anything a format drops on the way shows up.
+	 *
+	 * Dates are fixed so that every format can export it as is.
+	 */
+	static TestCase richTestCase() {
+		Vaccine mmr = vaccine(MMR_CVX, MMR_NAME);
+		Product mmrII = product("MMR-II", mmr, MERCK_MVX, "M-M-R II");
+
+		TestCase tc = new TestCase();
+		tc.setUid("TC-42");
+		tc.setName("Rich Test Case");
+		tc.setDescription("Two doses, one of them a product");
+		tc.setDateType(DateType.FIXED);
+		tc.setEvalDate(fixed("06/15/2012"));
+		tc.setGroupTag(MMR_NAME);
+		tc.setEvaluationType("Evaluation");
+		tc.setForecastType("Forecast");
+		tc.setTags(new ArrayList<Tag>(Arrays.asList(new Tag("regression"), new Tag("mmr"))));
+		tc.setWorkflowTag(WorkflowTag.FINAL);
+		tc.setPatient(patient("01/01/2010", Gender.M));
+		tc.setMetaData(metaData("7.3", "reviewed after the 2018 schedule"));
+
+		VaccinationEvent first = vaccination(1, "02/01/2010", mmr, EvaluationStatus.VALID, null, mmr);
+		first.setDoseNumber(1);
+		VaccinationEvent second = vaccination(2, "03/01/2010", mmrII, EvaluationStatus.INVALID,
+				EvaluationReason.C, mmr);
+		second.setDoseNumber(2);
+		tc.setEvents(new ArrayList<Event>(Arrays.<Event>asList(first, second)));
+
+		ExpectedForecast forecast = forecast(mmr, SerieStatus.D, "3",
+				"01/01/2011", "02/01/2011", "03/01/2011");
+		forecast.setComplete(fixed("04/01/2011"));
+		forecast.setForecastReason("Series in progress");
+		tc.setForecast(new ArrayList<ExpectedForecast>(Arrays.asList(forecast)));
+		return tc;
+	}
+
+	/**
+	 * What {@link gov.nist.healthcare.cds.service.impl.persist.SimpleMetaDataService} hands an
+	 * import : the version it was given, and the moment of the import as both dates.
+	 */
+	static MetaData createdMetaData(String version) {
+		MetaData md = new MetaData();
+		md.setVersion(version);
+		md.setImported(true);
+		md.setDateCreated(IMPORTED_ON);
+		md.setDateLastUpdated(IMPORTED_ON);
+		return md;
+	}
+
 	static Vaccine vaccine(String cvx, String name) {
 		Vaccine vaccine = new Vaccine();
 		vaccine.setCvx(cvx);
@@ -102,9 +163,29 @@ final class FormatServiceFixtures {
 
 	/** A date expressed as an offset from the patient's date of birth. */
 	static RelativeDate relativeToBirth(int years, int months, int weeks, int days) {
+		return relative(years, months, weeks, days, new StaticDateReference(RelativeTo.DOB));
+	}
+
+	/** A date expressed as an offset from the vaccination event holding the given id. */
+	static RelativeDate relativeToVaccination(int years, int months, int weeks, int days, int eventId) {
+		return relative(years, months, weeks, days, new VaccineDateReference(eventId));
+	}
+
+	/**
+	 * The six argument constructor of RelativeDateRule drops the number of weeks, so the rule is
+	 * built through its setters to make sure the fixture holds what it was asked for.
+	 */
+	private static RelativeDate relative(int years, int months, int weeks, int days, DateReference relativeTo) {
+		RelativeDateRule rule = new RelativeDateRule();
+		rule.setPosition(DatePosition.AFTER);
+		rule.setYear(years);
+		rule.setMonth(months);
+		rule.setWeek(weeks);
+		rule.setDay(days);
+		rule.setRelativeTo(relativeTo);
+
 		RelativeDate date = new RelativeDate();
-		date.add(new RelativeDateRule(DatePosition.AFTER, years, months, weeks, days,
-				new StaticDateReference(RelativeTo.DOB)));
+		date.add(rule);
 		return date;
 	}
 

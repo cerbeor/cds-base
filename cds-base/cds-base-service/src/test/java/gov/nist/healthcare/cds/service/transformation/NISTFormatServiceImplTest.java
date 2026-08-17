@@ -4,12 +4,14 @@ import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtur
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.MMR_CVX;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.MMR_NAME;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.completeTestCase;
+import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.createdMetaData;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.exportConfig;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.importAll;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.list;
-import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.metaData;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.product;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.relativeToBirth;
+import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.relativeToVaccination;
+import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.richTestCase;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.text;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.vaccination;
 import static gov.nist.healthcare.cds.service.transformation.FormatServiceFixtures.vaccine;
@@ -19,6 +21,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
@@ -87,8 +90,8 @@ public class NISTFormatServiceImplTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		mmr = vaccine(MMR_CVX, MMR_NAME);
-		Mockito.when(mdService.create(Mockito.anyBoolean())).thenAnswer(newMetaData());
-		Mockito.when(mdService.create(Mockito.anyBoolean(), Mockito.anyString())).thenAnswer(newMetaData());
+		Mockito.when(mdService.create(Mockito.anyBoolean())).thenAnswer(newMetaData(null));
+		Mockito.when(mdService.create(Mockito.anyBoolean(), Mockito.anyString())).thenAnswer(newMetaData(1));
 	}
 
 	// --- Format ---
@@ -304,6 +307,59 @@ public class NISTFormatServiceImplTest {
 		Assert.assertTrue(result.getErrors().isEmpty());
 	}
 
+	// --- Round trip fidelity ---
+
+	/**
+	 * The whole point of the format : what goes out has to come back. Everything a test case is
+	 * made of is compared, so a field the export forgets to write - or the import forgets to
+	 * read - shows up here rather than in production.
+	 *
+	 * Two things do not survive the trip :
+	 *
+	 * - the metadata dates : the export writes them, but the import stamps the test case with
+	 *   the date of the import instead of reading them back ;
+	 * - the dose number of a vaccination : the XML has no place for it, so it comes back as the
+	 *   default of 1.
+	 */
+	@Test
+	public void exportToFile_thenImportFromFile_changesNothingButTheMetaDataDatesAndTheDoseNumbers()
+			throws Exception {
+		Mockito.when(vaccineRepository.findOne(MMR_CVX)).thenReturn(mmr);
+		Mockito.when(productRepository.getProduct(MERCK_MVX, MMR_CVX))
+				.thenReturn(product("MMR-II", mmr, MERCK_MVX, "M-M-R II"));
+		TestCase original = richTestCase();
+
+		TestCase imported = importOne(exportOne(original));
+
+		Assert.assertEquals(Arrays.asList(
+				"metaData.dateCreated: 2018-01-01 -> 2020-09-30",
+				"metaData.dateLastUpdated: 2018-06-01 -> 2020-09-30",
+				"events[1].doseNumber: 2 -> 1"),
+				TestCaseDiff.differences(original, imported));
+	}
+
+	/**
+	 * Same check for a test case whose dates are all relative, so that the rules and their
+	 * references are covered too. The metadata is stamped with the date of the import up front,
+	 * to leave the known loss above out of the way and keep this test about the dates.
+	 */
+	@Test
+	public void exportToFile_thenImportFromFile_changesNothingOfARelativeDatedTestCase() throws Exception {
+		Mockito.when(vaccineRepository.findOne(MMR_CVX)).thenReturn(mmr);
+		TestCase original = completeTestCase();
+		original.setDateType(DateType.RELATIVE);
+		original.setEvalDate(relativeToBirth(6, 0, 0, 0));
+		original.getEvents().get(0).setDate(relativeToBirth(1, 2, 3, 4));
+		original.getForecast().get(0).setEarliest(relativeToBirth(2, 0, 0, 0));
+		original.getForecast().get(0).setRecommended(relativeToVaccination(0, 6, 0, 0, 1));
+		original.getForecast().get(0).setPastDue(null);
+		original.setMetaData(createdMetaData("1.0"));
+
+		TestCase imported = importOne(exportOne(original));
+
+		Assert.assertEquals(Collections.<String>emptyList(), TestCaseDiff.differences(original, imported));
+	}
+
 	// --- Import errors ---
 
 	@Test
@@ -417,12 +473,16 @@ public class NISTFormatServiceImplTest {
 		return messages;
 	}
 
-	/** A fresh instance per call : the service fills the one it is handed. */
-	private Answer<MetaData> newMetaData() {
+	/**
+	 * Stands in for SimpleMetaDataService : a fresh instance per call, stamped with the moment
+	 * of the import, holding the version passed at the given argument index if there is one.
+	 */
+	private Answer<MetaData> newMetaData(final Integer versionArgument) {
 		return new Answer<MetaData>() {
 			@Override
 			public MetaData answer(InvocationOnMock invocation) {
-				return metaData("1.0", null);
+				return createdMetaData(versionArgument == null ? "1.0"
+						: (String) invocation.getArguments()[versionArgument.intValue()]);
 			}
 		};
 	}
