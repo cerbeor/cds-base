@@ -1,5 +1,6 @@
 package gov.nist.healthcare.cds.service;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -8,6 +9,7 @@ import java.util.Date;
  */
 public class UserContact {
 
+	public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 	private String username;
 	private String email;
 	private String organization;
@@ -117,6 +119,34 @@ public class UserContact {
 
 	@Override
 	public String toString() {
-		return username + " <" + email + "> (" + organization + ")";
+		StringBuilder details = new StringBuilder();
+		append(details, "testPlans", testPlans);
+		append(details, "softwareConfigs", softwareConfigs);
+		append(details, "reports", reports);
+		append(details, "validationJobs", validationJobs);
+		if (ownsSharedTestPlans) {
+			append(details, "shared test plans");
+		}
+		append(details, "last API call: " + (lastApiCall == null ? "never" : format(lastApiCall)));
+
+		return username + " <" + email + "> (" + organization + ") [" + details + "]";
+	}
+
+	/** Appends 'name: count' only when the count is worth reporting. */
+	private void append(StringBuilder details, String name, int count) {
+		if (count > 0) {
+			append(details, name + ": " + count);
+		}
+	}
+
+	private void append(StringBuilder details, String value) {
+		if (details.length() > 0) {
+			details.append(", ");
+		}
+		details.append(value);
+	}
+
+	private String format(Date date) {
+		return SIMPLE_DATE_FORMAT.format(date);
 	}
 }

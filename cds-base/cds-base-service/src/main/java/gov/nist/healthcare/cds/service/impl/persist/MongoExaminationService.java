@@ -123,8 +123,11 @@ public class MongoExaminationService {
 
 		List<UserContact> contacts = new ArrayList<>();
 		for (UserContact contact : snapshot()) {
-			if (contact.ownsData() || isActiveSince(contact, cutoff) || contact.isOwnsSharedTestPlans()) {
+			if (contact.ownsData() || isActiveSince(contact, cutoff) || contact.isOwnsSharedTestPlans()
+			) {
 				contacts.add(contact);
+			} else {
+				logger.info("Filtered out: {}", contact);
 			}
 		}
 
