@@ -59,6 +59,30 @@
 			<artifactId>poi-ooxml</artifactId>
 			<version>5.2.5</version>
 		</dependency>
+
+		<!--
+			The Spring platform BOM manages commons-io, xmlbeans and log4j-api down to versions
+			older than the ones POI 5.2.5 needs, which makes reading and writing a XSSFWorkbook
+			fail with a NoClassDefFoundError / NoSuchMethodError. The versions POI asks for are
+			pinned back here.
+		-->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.15.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.xmlbeans</groupId>
+			<artifactId>xmlbeans</artifactId>
+			<version>5.2.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.21.1</version>
+		</dependency>
 		<!-- Uses Castor for XML -->
 		<dependency>
 			<groupId>org.codehaus.castor</groupId>
