@@ -16,7 +16,6 @@ import gov.nist.healthcare.cds.auth.repo.AccountRepository;
 import gov.nist.healthcare.cds.domain.TestCase;
 import gov.nist.healthcare.cds.domain.TestCaseGroup;
 import gov.nist.healthcare.cds.domain.TestPlan;
-import gov.nist.healthcare.cds.domain.wrapper.Report;
 import gov.nist.healthcare.cds.repositories.ReportRepository;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
@@ -92,10 +91,7 @@ public class SimpleDatabaseCleanupService implements DatabaseCleanupService {
 		softwareConfigRepository.delete(softwareConfigRepository.findByUser(username));
 		validationJobRepository.delete(validationJobRepository.findByInitiator(username));
 
-		List<Report> remainingReports = reportRepository.findByUser(username);
-		if (!remainingReports.isEmpty()) {
-			reportRepository.delete(remainingReports);
-		}
+		reportRepository.deleteReportsForUser(username);
 
 		if (userMetadataRepository.exists(username)) {
 			userMetadataRepository.delete(username);
@@ -110,7 +106,7 @@ public class SimpleDatabaseCleanupService implements DatabaseCleanupService {
 	private void deleteTestPlanCascade(TestPlan tp) {
 		if (tp.getTestCases() != null) {
 			for (TestCase tc : tp.getTestCases()) {
-				deleteReportsForTestCase(tc);
+				reportRepository.deleteReportsForTestCase(tc.getId());
 			}
 			testCaseRepository.delete(tp.getTestCases());
 		}
@@ -118,20 +114,13 @@ public class SimpleDatabaseCleanupService implements DatabaseCleanupService {
 		for (TestCaseGroup tcg : tp.getTestCaseGroups()) {
 			if (tcg.getTestCases() != null) {
 				for (TestCase tc : tcg.getTestCases()) {
-					deleteReportsForTestCase(tc);
+					reportRepository.deleteReportsForTestCase(tc.getId());
 				}
 				testCaseRepository.delete(tcg.getTestCases());
 			}
 		}
 
 		testPlanRepository.delete(tp);
-	}
-
-	private void deleteReportsForTestCase(TestCase tc) {
-		List<Report> reports = reportRepository.reportsForTestCase(tc.getId());
-		if (!reports.isEmpty()) {
-			reportRepository.delete(reports);
-		}
 	}
 
 	private void cleanViewerLists(Set<String> deletedUsernames) {

@@ -24,7 +24,6 @@ import gov.nist.healthcare.cds.domain.TestCaseGroup;
 import gov.nist.healthcare.cds.domain.TestPlan;
 import gov.nist.healthcare.cds.domain.SoftwareConfig;
 import gov.nist.healthcare.cds.domain.ValidationJob;
-import gov.nist.healthcare.cds.domain.wrapper.Report;
 import gov.nist.healthcare.cds.repositories.ReportRepository;
 import gov.nist.healthcare.cds.repositories.SoftwareConfigRepository;
 import gov.nist.healthcare.cds.repositories.TestCaseRepository;
@@ -91,12 +90,6 @@ public class DatabaseCleanupServiceTest {
 		return tc;
 	}
 
-	private Report createReport(String id) {
-		Report r = new Report();
-		r.setId(id);
-		return r;
-	}
-
 	// --- Whitelisted accounts are unaffected ---
 
 	@Test
@@ -139,22 +132,17 @@ public class DatabaseCleanupServiceTest {
 		TestPlan privatePlan = createTestPlan("tp1", "bob", false);
 		privatePlan.setTestCases(Arrays.asList(tc1, tc2));
 
-		Report r1 = createReport("r1");
-		Report r2 = createReport("r2");
-
 		Mockito.when(testPlanRepository.findByUser("bob")).thenReturn(Arrays.asList(privatePlan));
-		Mockito.when(reportRepository.reportsForTestCase("tc1")).thenReturn(Arrays.asList(r1));
-		Mockito.when(reportRepository.reportsForTestCase("tc2")).thenReturn(Arrays.asList(r2));
 		Mockito.when(softwareConfigRepository.findByUser("bob")).thenReturn(Collections.<SoftwareConfig>emptyList());
 		Mockito.when(validationJobRepository.findByInitiator("bob")).thenReturn(Collections.<ValidationJob>emptyList());
-		Mockito.when(reportRepository.findByUser("bob")).thenReturn(Collections.<Report>emptyList());
 		Mockito.when(userMetadataRepository.exists("bob")).thenReturn(true);
 		Mockito.when(testPlanRepository.findAll()).thenReturn(Collections.<TestPlan>emptyList());
 
 		cleanupService.cleanDatabase(Collections.<String>emptySet(), Collections.<String>emptySet());
 
-		Mockito.verify(reportRepository).delete(Arrays.asList(r1));
-		Mockito.verify(reportRepository).delete(Arrays.asList(r2));
+		Mockito.verify(reportRepository).deleteReportsForTestCase("tc1");
+		Mockito.verify(reportRepository).deleteReportsForTestCase("tc2");
+		Mockito.verify(reportRepository).deleteReportsForUser("bob");
 		Mockito.verify(testCaseRepository).delete(Arrays.asList(tc1, tc2));
 		Mockito.verify(testPlanRepository).delete(privatePlan);
 		Mockito.verify(userMetadataRepository).delete("bob");
@@ -175,20 +163,16 @@ public class DatabaseCleanupServiceTest {
 		TestPlan plan = createTestPlan("tp1", "bob", false);
 		plan.setTestCaseGroups(Arrays.asList(group));
 
-		Report r1 = createReport("r1");
-
 		Mockito.when(testPlanRepository.findByUser("bob")).thenReturn(Arrays.asList(plan));
-		Mockito.when(reportRepository.reportsForTestCase("tc1")).thenReturn(Arrays.asList(r1));
-		Mockito.when(reportRepository.reportsForTestCase("tc2")).thenReturn(Collections.<Report>emptyList());
 		Mockito.when(softwareConfigRepository.findByUser("bob")).thenReturn(Collections.<SoftwareConfig>emptyList());
 		Mockito.when(validationJobRepository.findByInitiator("bob")).thenReturn(Collections.<ValidationJob>emptyList());
-		Mockito.when(reportRepository.findByUser("bob")).thenReturn(Collections.<Report>emptyList());
 		Mockito.when(userMetadataRepository.exists("bob")).thenReturn(false);
 		Mockito.when(testPlanRepository.findAll()).thenReturn(Collections.<TestPlan>emptyList());
 
 		cleanupService.cleanDatabase(Collections.<String>emptySet(), Collections.<String>emptySet());
 
-		Mockito.verify(reportRepository).delete(Arrays.asList(r1));
+		Mockito.verify(reportRepository).deleteReportsForTestCase("tc1");
+		Mockito.verify(reportRepository).deleteReportsForTestCase("tc2");
 		Mockito.verify(testCaseRepository).delete(Arrays.asList(tc1, tc2));
 		Mockito.verify(testPlanRepository).delete(plan);
 	}
@@ -205,7 +189,6 @@ public class DatabaseCleanupServiceTest {
 		Mockito.when(testPlanRepository.findByUser("bob")).thenReturn(Collections.<TestPlan>emptyList());
 		Mockito.when(softwareConfigRepository.findByUser("bob")).thenReturn(configs);
 		Mockito.when(validationJobRepository.findByInitiator("bob")).thenReturn(Collections.<ValidationJob>emptyList());
-		Mockito.when(reportRepository.findByUser("bob")).thenReturn(Collections.<Report>emptyList());
 		Mockito.when(userMetadataRepository.exists("bob")).thenReturn(false);
 		Mockito.when(testPlanRepository.findAll()).thenReturn(Collections.<TestPlan>emptyList());
 
@@ -226,7 +209,6 @@ public class DatabaseCleanupServiceTest {
 		Mockito.when(testPlanRepository.findByUser("bob")).thenReturn(Collections.<TestPlan>emptyList());
 		Mockito.when(softwareConfigRepository.findByUser("bob")).thenReturn(Collections.<SoftwareConfig>emptyList());
 		Mockito.when(validationJobRepository.findByInitiator("bob")).thenReturn(jobs);
-		Mockito.when(reportRepository.findByUser("bob")).thenReturn(Collections.<Report>emptyList());
 		Mockito.when(userMetadataRepository.exists("bob")).thenReturn(false);
 		Mockito.when(testPlanRepository.findAll()).thenReturn(Collections.<TestPlan>emptyList());
 
@@ -240,18 +222,15 @@ public class DatabaseCleanupServiceTest {
 		Account toDelete = createAccount("bob", "bob@test.com");
 		Mockito.when(accountRepository.findAll()).thenReturn(Arrays.asList(toDelete));
 
-		Report orphan = createReport("orphan1");
-
 		Mockito.when(testPlanRepository.findByUser("bob")).thenReturn(Collections.<TestPlan>emptyList());
 		Mockito.when(softwareConfigRepository.findByUser("bob")).thenReturn(Collections.<SoftwareConfig>emptyList());
 		Mockito.when(validationJobRepository.findByInitiator("bob")).thenReturn(Collections.<ValidationJob>emptyList());
-		Mockito.when(reportRepository.findByUser("bob")).thenReturn(Arrays.asList(orphan));
 		Mockito.when(userMetadataRepository.exists("bob")).thenReturn(false);
 		Mockito.when(testPlanRepository.findAll()).thenReturn(Collections.<TestPlan>emptyList());
 
 		cleanupService.cleanDatabase(Collections.<String>emptySet(), Collections.<String>emptySet());
 
-		Mockito.verify(reportRepository).delete(Arrays.asList(orphan));
+		Mockito.verify(reportRepository).deleteReportsForUser("bob");
 	}
 
 	@Test
@@ -265,7 +244,6 @@ public class DatabaseCleanupServiceTest {
 		Mockito.when(testPlanRepository.findByUser("bob")).thenReturn(Collections.<TestPlan>emptyList());
 		Mockito.when(softwareConfigRepository.findByUser("bob")).thenReturn(Collections.<SoftwareConfig>emptyList());
 		Mockito.when(validationJobRepository.findByInitiator("bob")).thenReturn(Collections.<ValidationJob>emptyList());
-		Mockito.when(reportRepository.findByUser("bob")).thenReturn(Collections.<Report>emptyList());
 		Mockito.when(userMetadataRepository.exists("bob")).thenReturn(false);
 		Mockito.when(testPlanRepository.findAll()).thenReturn(Collections.<TestPlan>emptyList());
 
@@ -287,7 +265,6 @@ public class DatabaseCleanupServiceTest {
 		Mockito.when(testPlanRepository.findByUser("bob")).thenReturn(Arrays.asList(publicPlan));
 		Mockito.when(softwareConfigRepository.findByUser("bob")).thenReturn(Collections.<SoftwareConfig>emptyList());
 		Mockito.when(validationJobRepository.findByInitiator("bob")).thenReturn(Collections.<ValidationJob>emptyList());
-		Mockito.when(reportRepository.findByUser("bob")).thenReturn(Collections.<Report>emptyList());
 		Mockito.when(userMetadataRepository.exists("bob")).thenReturn(false);
 		Mockito.when(testPlanRepository.findAll()).thenReturn(Collections.<TestPlan>emptyList());
 
@@ -309,10 +286,8 @@ public class DatabaseCleanupServiceTest {
 		TestPlan publicPlan = createTestPlan("tp-pub", "bob", true);
 
 		Mockito.when(testPlanRepository.findByUser("bob")).thenReturn(Arrays.asList(privatePlan, publicPlan));
-		Mockito.when(reportRepository.reportsForTestCase("tc-priv")).thenReturn(Collections.<Report>emptyList());
 		Mockito.when(softwareConfigRepository.findByUser("bob")).thenReturn(Collections.<SoftwareConfig>emptyList());
 		Mockito.when(validationJobRepository.findByInitiator("bob")).thenReturn(Collections.<ValidationJob>emptyList());
-		Mockito.when(reportRepository.findByUser("bob")).thenReturn(Collections.<Report>emptyList());
 		Mockito.when(userMetadataRepository.exists("bob")).thenReturn(false);
 		Mockito.when(testPlanRepository.findAll()).thenReturn(Collections.<TestPlan>emptyList());
 
@@ -336,7 +311,6 @@ public class DatabaseCleanupServiceTest {
 		Mockito.when(testPlanRepository.findByUser("bob")).thenReturn(Collections.<TestPlan>emptyList());
 		Mockito.when(softwareConfigRepository.findByUser("bob")).thenReturn(Collections.<SoftwareConfig>emptyList());
 		Mockito.when(validationJobRepository.findByInitiator("bob")).thenReturn(Collections.<ValidationJob>emptyList());
-		Mockito.when(reportRepository.findByUser("bob")).thenReturn(Collections.<Report>emptyList());
 		Mockito.when(userMetadataRepository.exists("bob")).thenReturn(false);
 		Mockito.when(testPlanRepository.findAll()).thenReturn(Arrays.asList(survivingPlan));
 
@@ -363,7 +337,6 @@ public class DatabaseCleanupServiceTest {
 		Mockito.when(testPlanRepository.findByUser("bob")).thenReturn(Collections.<TestPlan>emptyList());
 		Mockito.when(softwareConfigRepository.findByUser("bob")).thenReturn(Collections.<SoftwareConfig>emptyList());
 		Mockito.when(validationJobRepository.findByInitiator("bob")).thenReturn(Collections.<ValidationJob>emptyList());
-		Mockito.when(reportRepository.findByUser("bob")).thenReturn(Collections.<Report>emptyList());
 		Mockito.when(userMetadataRepository.exists("bob")).thenReturn(false);
 		Mockito.when(testPlanRepository.findAll()).thenReturn(Arrays.asList(plan));
 
