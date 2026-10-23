@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:TestCase xmlns:ns2="https://fits.nist.gov/xml/" UID="AART-POL-4">
+    <Name>Dose 3 at 6 months</Name>
+    <Description></Description>
+    <Group>POL</Group>
+    <DateType>RELATIVE</DateType>
+    <MetaData>
+        <version>1</version>
+        <dateCreated>2018-10-17Z</dateCreated>
+        <dateLastUpdated>2018-10-17Z</dateLastUpdated>
+    </MetaData>
+    <AssessmentDate>
+        <Relative>
+            <Rule years="0" months="0" days="0" weeks="0">
+                <RelativeTo position="BEFORE" reference="EVALDATE"/>
+            </Rule>
+        </Relative>
+    </AssessmentDate>
+    <Patient>
+        <Gender>Female</Gender>
+        <DateOfBirth>
+            <Relative>
+                <Rule years="0" months="6" days="0" weeks="0">
+                    <RelativeTo position="BEFORE" reference="EVALDATE"/>
+                </Rule>
+            </Relative>
+        </DateOfBirth>
+    </Patient>
+    <Events>
+        <Event type="VACCINATION" ID="0">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="2" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="IPV" cvx="10"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="polio, unspecified formulation" cvx="89"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+        <Event type="VACCINATION" ID="1">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="4" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="IPV" cvx="10"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="polio, unspecified formulation" cvx="89"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+        <Event type="VACCINATION" ID="2">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="6" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="IPV" cvx="10"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="polio, unspecified formulation" cvx="89"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+    </Events>
+    <Forecasts>
+        <Forecast>
+            <target name="polio, unspecified formulation" cvx="89"/>
+            <SerieStatus code="N" details="Not complete"/>
+            <ForecastReason></ForecastReason>
+            <Earliest>
+                <Relative>
+                    <Rule years="4" months="0" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Earliest>
+            <Recommended>
+                <Relative>
+                    <Rule years="4" months="0" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Recommended>
+            <PastDue>
+                <Relative>
+                    <Rule years="7" months="0" days="-1" weeks="4">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </PastDue>
+            <Latest/>
+            <DoseNumber>4</DoseNumber>
+        </Forecast>
+    </Forecasts>
+</ns2:TestCase>

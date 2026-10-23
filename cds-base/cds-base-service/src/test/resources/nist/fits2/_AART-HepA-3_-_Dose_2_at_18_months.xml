@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:TestCase xmlns:ns2="https://fits.nist.gov/xml/" UID="AART-HepA-3">
+    <Name>Dose 2 at 18 months</Name>
+    <Description></Description>
+    <Group>HepA</Group>
+    <DateType>RELATIVE</DateType>
+    <MetaData>
+        <version>1</version>
+        <dateCreated>2017-06-22-04:00</dateCreated>
+        <dateLastUpdated>2018-08-19-04:00</dateLastUpdated>
+    </MetaData>
+    <AssessmentDate>
+        <Relative>
+            <Rule years="0" months="0" days="0" weeks="0">
+                <RelativeTo position="BEFORE" reference="EVALDATE"/>
+            </Rule>
+        </Relative>
+    </AssessmentDate>
+    <Patient>
+        <Gender>Female</Gender>
+        <DateOfBirth>
+            <Relative>
+                <Rule years="0" months="18" days="0" weeks="0">
+                    <RelativeTo position="BEFORE" reference="EVALDATE"/>
+                </Rule>
+            </Relative>
+        </DateOfBirth>
+    </Patient>
+    <Events>
+        <Event type="VACCINATION" ID="0">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="12" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="Hep A, unspecified formulation" cvx="85"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="Hep A, unspecified formulation" cvx="85"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+        <Event type="VACCINATION" ID="1">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="18" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="Hep A, unspecified formulation" cvx="85"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="Hep A, unspecified formulation" cvx="85"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+    </Events>
+    <Forecasts>
+        <Forecast>
+            <target name="Hep A, unspecified formulation" cvx="85"/>
+            <SerieStatus code="C" details="Complete"/>
+            <ForecastReason></ForecastReason>
+            <Earliest/>
+            <Recommended/>
+            <PastDue/>
+            <Latest/>
+            <DoseNumber></DoseNumber>
+        </Forecast>
+    </Forecasts>
+</ns2:TestCase>

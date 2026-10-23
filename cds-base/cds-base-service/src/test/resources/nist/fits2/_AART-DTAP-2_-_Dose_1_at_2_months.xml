@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:TestCase xmlns:ns2="https://fits.nist.gov/xml/" UID="AART-DTAP-2">
+    <Name>Dose 1 at 2 months</Name>
+    <Description></Description>
+    <Group>DTAP</Group>
+    <DateType>RELATIVE</DateType>
+    <MetaData>
+        <version>1</version>
+        <dateCreated>2018-10-17-04:00</dateCreated>
+        <dateLastUpdated>2018-10-17-04:00</dateLastUpdated>
+    </MetaData>
+    <AssessmentDate>
+        <Relative>
+            <Rule years="0" months="0" days="0" weeks="0">
+                <RelativeTo position="BEFORE" reference="EVALDATE"/>
+            </Rule>
+        </Relative>
+    </AssessmentDate>
+    <Patient>
+        <Gender>Female</Gender>
+        <DateOfBirth>
+            <Relative>
+                <Rule years="0" months="2" days="0" weeks="0">
+                    <RelativeTo position="BEFORE" reference="EVALDATE"/>
+                </Rule>
+            </Relative>
+        </DateOfBirth>
+    </Patient>
+    <Events>
+        <Event type="VACCINATION" ID="0">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="2" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="DTaP, unspecified formulation" cvx="107"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="DTaP, unspecified formulation" cvx="107"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+    </Events>
+    <Forecasts>
+        <Forecast>
+            <target name="DTaP, unspecified formulation" cvx="107"/>
+            <SerieStatus code="N" details="Not complete"/>
+            <ForecastReason></ForecastReason>
+            <Earliest>
+                <Relative>
+                    <Rule years="0" months="0" days="0" weeks="4">
+                        <RelativeTo position="AFTER" reference="VACCINATION" id="0"/>
+                    </Rule>
+                </Relative>
+            </Earliest>
+            <Recommended>
+                <Relative>
+                    <Rule years="0" months="4" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Recommended>
+            <PastDue>
+                <Relative>
+                    <Rule years="0" months="5" days="-1" weeks="4">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </PastDue>
+            <Latest/>
+            <DoseNumber>2</DoseNumber>
+        </Forecast>
+    </Forecasts>
+</ns2:TestCase>

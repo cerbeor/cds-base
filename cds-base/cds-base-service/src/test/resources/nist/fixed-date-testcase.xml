@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:TestCase xmlns:ns2="https://fits.nist.gov/xml/" UID="TC-0001">
+    <Name>Fixed Date Test Case</Name>
+    <Description>A complete fixed date test case</Description>
+    <Group>GROUP-A</Group>
+    <DateType>FIXED</DateType>
+    <MetaData>
+        <version>1.0</version>
+        <dateCreated>2018-01-01-05:00</dateCreated>
+        <dateLastUpdated>2018-06-15-04:00</dateLastUpdated>
+    </MetaData>
+    <AssessmentDate>
+        <Fixed date="06/01/2018"/>
+    </AssessmentDate>
+    <Patient>
+        <Gender>Female</Gender>
+        <DateOfBirth>
+            <Fixed date="01/15/2016"/>
+        </DateOfBirth>
+    </Patient>
+    <Events>
+        <Event type="VACCINATION" ID="0">
+            <EventDate>
+                <Fixed date="03/15/2016"/>
+            </EventDate>
+            <Administred name="DTaP" cvx="20"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="DTaP" cvx="20"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+        <Event type="VACCINATION" ID="1">
+            <EventDate>
+                <Fixed date="05/15/2016"/>
+            </EventDate>
+            <Administred name="Infanrix" cvx="20" mvx="SKB"/>
+            <Evaluations>
+                <Evaluation status="Not Valid">
+                    <Vaccine name="DTaP" cvx="20"/>
+                    <EvaluationReason code="D" value="Vaccine Dose Administered was administered too soon following a previous dose."/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+    </Events>
+    <Forecasts>
+        <Forecast>
+            <target name="DTaP" cvx="20"/>
+            <SerieStatus code="D" details="Due"/>
+            <ForecastReason>Due now</ForecastReason>
+            <Earliest>
+                <Fixed date="07/15/2016"/>
+            </Earliest>
+            <Recommended>
+                <Fixed date="08/15/2016"/>
+            </Recommended>
+            <PastDue>
+                <Fixed date="09/15/2016"/>
+            </PastDue>
+            <Latest>
+                <Fixed date="10/15/2016"/>
+            </Latest>
+            <DoseNumber>3</DoseNumber>
+        </Forecast>
+    </Forecasts>
+</ns2:TestCase>

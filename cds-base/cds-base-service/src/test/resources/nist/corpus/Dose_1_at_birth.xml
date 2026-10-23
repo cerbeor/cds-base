@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:TestCase xmlns:ns2="https://fits.nist.gov/xml/" UID="AART-HepB-2">
+    <Name>Dose 1 at birth</Name>
+    <Description></Description>
+    <Group>HepB</Group>
+    <DateType>RELATIVE</DateType>
+    <MetaData>
+        <version>1</version>
+        <dateCreated>2018-09-20Z</dateCreated>
+        <dateLastUpdated>2018-09-20Z</dateLastUpdated>
+    </MetaData>
+    <AssessmentDate>
+        <Relative>
+            <Rule years="0" months="0" days="0" weeks="0">
+                <RelativeTo position="BEFORE" reference="EVALDATE"/>
+            </Rule>
+        </Relative>
+    </AssessmentDate>
+    <Patient>
+        <Gender>Female</Gender>
+        <DateOfBirth>
+            <Relative>
+                <Rule years="0" months="0" days="0" weeks="0">
+                    <RelativeTo position="BEFORE" reference="EVALDATE"/>
+                </Rule>
+            </Relative>
+        </DateOfBirth>
+    </Patient>
+    <Events>
+        <Event type="VACCINATION" ID="0">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="0" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="Hep B, unspecified formulation" cvx="45"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="Hep B, unspecified formulation" cvx="45"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+    </Events>
+    <Forecasts>
+        <Forecast>
+            <target name="Hep B, unspecified formulation" cvx="45"/>
+            <SerieStatus code="N" details="Not complete"/>
+            <ForecastReason></ForecastReason>
+            <Earliest>
+                <Relative>
+                    <Rule years="0" months="0" days="0" weeks="4">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Earliest>
+            <Recommended>
+                <Relative>
+                    <Rule years="0" months="1" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Recommended>
+            <PastDue>
+                <Relative>
+                    <Rule years="0" months="3" days="-1" weeks="4">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </PastDue>
+            <Latest/>
+            <DoseNumber>2</DoseNumber>
+        </Forecast>
+    </Forecasts>
+</ns2:TestCase>

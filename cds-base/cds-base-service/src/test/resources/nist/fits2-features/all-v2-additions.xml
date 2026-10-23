@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:TestCase xmlns:ns2="https://fits.nist.gov/xml/" UID="FITS2-FEATURE">
+    <Name>FITS v2 feature test case</Name>
+    <Description>Exercises a FITS v2 only part of the format</Description>
+    <Group>Forward Compatibility</Group>
+    <DateType>RELATIVE</DateType>
+    <MetaData>
+        <version>3</version>
+        <dateCreated>2018-09-20Z</dateCreated>
+        <dateLastUpdated>2019-02-12Z</dateLastUpdated>
+        <changeLog>All FITS v2 additions in one document</changeLog>
+    </MetaData>
+    <AssessmentDate>
+        <Relative>
+            <Rule years="0" months="0" days="0" weeks="0">
+                <RelativeTo position="BEFORE" reference="EVALDATE"/>
+            </Rule>
+        </Relative>
+    </AssessmentDate>
+    <Patient>
+        <Gender>Female</Gender>
+        <DateOfBirth>
+            <Relative>
+                <Rule years="2" months="0" days="0" weeks="0">
+                    <RelativeTo position="BEFORE" reference="EVALDATE"/>
+                </Rule>
+            </Relative>
+        </DateOfBirth>
+    </Patient>
+    <Events>
+        <Event type="VACCINATION" ID="0">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="2" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="Hep B, unspecified formulation" cvx="45"/>
+            <Evaluations>
+                <Evaluation status="Valid" seriesType="Standard">
+                    <Vaccine name="Hep B, unspecified formulation" cvx="45"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+        <Event type="VACCINATION" ID="1">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="1" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="VACCINATION" id="0"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="Hep B, unspecified formulation" cvx="45"/>
+            <Evaluations>
+                <Evaluation status="Substandard" seriesType="Risk">
+                    <Vaccine name="Hep B, unspecified formulation" cvx="45"/>
+                    <EvaluationReason code="F" value="Vaccine Dose Administered was administered too soon after the previous dose."/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+    </Events>
+    <Forecasts>
+        <Forecast>
+            <target name="Hep B, unspecified formulation" cvx="45"/>
+            <SerieStatus code="Z" details="Contraindicated"/>
+            <ForecastReason>Non standard series</ForecastReason>
+            <Earliest>
+                <Relative>
+                    <Rule years="0" months="4" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Earliest>
+            <Recommended>
+                <Relative>
+                    <Rule years="0" months="6" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Recommended>
+            <PastDue>
+                <Relative>
+                    <Rule years="0" months="8" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </PastDue>
+            <Latest>
+                <Relative>
+                    <Rule years="1" months="0" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Latest>
+            <DoseNumber>2</DoseNumber>
+        </Forecast>
+        <Forecast>
+            <target name="polio, unspecified formulation" cvx="89"/>
+            <SerieStatus code="X" details="Aged Out"/>
+            <ForecastReason></ForecastReason>
+            <Earliest>
+                <Relative>
+                    <Rule years="0" months="2" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Earliest>
+            <Recommended>
+                <Relative>
+                    <Rule years="0" months="4" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Recommended>
+            <PastDue>
+                <Relative>
+                    <Rule years="0" months="6" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </PastDue>
+            <Latest/>
+            <DoseNumber>1</DoseNumber>
+        </Forecast>
+    </Forecasts>
+    <ForecastType>CDC</ForecastType>
+    <EvaluationType>ACIP</EvaluationType>
+    <WorkflowTag>ONHOLD</WorkflowTag>
+    <Tags>
+        <Tag>regression</Tag>
+        <Tag>forward-compatibility</Tag>
+    </Tags>
+</ns2:TestCase>

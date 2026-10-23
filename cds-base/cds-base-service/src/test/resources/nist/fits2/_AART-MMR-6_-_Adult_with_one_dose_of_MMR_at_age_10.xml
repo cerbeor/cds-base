@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:TestCase xmlns:ns2="https://fits.nist.gov/xml/" UID="AART-MMR-6">
+    <Name>Adult with one dose of MMR at age 10</Name>
+    <Description></Description>
+    <Group>MMR</Group>
+    <DateType>RELATIVE</DateType>
+    <MetaData>
+        <version>1</version>
+        <dateCreated>2018-09-19-04:00</dateCreated>
+        <dateLastUpdated>2020-02-05-05:00</dateLastUpdated>
+    </MetaData>
+    <AssessmentDate>
+        <Relative>
+            <Rule years="0" months="0" days="0" weeks="0">
+                <RelativeTo position="BEFORE" reference="EVALDATE"/>
+            </Rule>
+        </Relative>
+    </AssessmentDate>
+    <Patient>
+        <Gender>Female</Gender>
+        <DateOfBirth>
+            <Relative>
+                <Rule years="25" months="0" days="0" weeks="0">
+                    <RelativeTo position="BEFORE" reference="EVALDATE"/>
+                </Rule>
+            </Relative>
+        </DateOfBirth>
+    </Patient>
+    <Events>
+        <Event type="VACCINATION" ID="0">
+            <EventDate>
+                <Relative>
+                    <Rule years="10" months="0" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="MMR" cvx="03"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="MMR" cvx="03"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+    </Events>
+    <Forecasts>
+        <Forecast>
+            <target name="MMR" cvx="03"/>
+            <SerieStatus code="C" details="Complete"/>
+            <ForecastReason></ForecastReason>
+            <Earliest/>
+            <Recommended/>
+            <PastDue/>
+            <Latest/>
+            <DoseNumber></DoseNumber>
+        </Forecast>
+    </Forecasts>
+</ns2:TestCase>

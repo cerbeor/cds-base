@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:TestCase xmlns:ns2="https://fits.nist.gov/xml/" UID="TC-0002">
+    <Name>Relative Date Test Case</Name>
+    <Description>A complete relative date test case</Description>
+    <Group>GROUP-B</Group>
+    <DateType>RELATIVE</DateType>
+    <MetaData>
+        <version>1.0</version>
+        <dateCreated>2018-01-01-05:00</dateCreated>
+        <dateLastUpdated>2018-06-15-04:00</dateLastUpdated>
+    </MetaData>
+    <AssessmentDate>
+        <Relative>
+            <Rule years="2" months="0" days="0" weeks="0">
+                <RelativeTo position="AFTER" reference="DOB"/>
+            </Rule>
+        </Relative>
+    </AssessmentDate>
+    <Patient>
+        <Gender>Male</Gender>
+        <DateOfBirth>
+            <Relative>
+                <Rule years="2" months="0" days="0" weeks="0">
+                    <RelativeTo position="BEFORE" reference="EVALDATE"/>
+                </Rule>
+            </Relative>
+        </DateOfBirth>
+    </Patient>
+    <Events>
+        <Event type="VACCINATION" ID="0">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="2" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="Hep B, adolescent or pediatric" cvx="08"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="Hep B, adolescent or pediatric" cvx="08"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+        <Event type="VACCINATION" ID="1">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="0" days="3" weeks="4">
+                        <RelativeTo position="AFTER" reference="VACCINATION" id="0"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="Hep B, adolescent or pediatric" cvx="08"/>
+            <Evaluations>
+                <Evaluation status="Substandard">
+                    <Vaccine name="Hep B, adolescent or pediatric" cvx="08"/>
+                    <EvaluationReason code="F" value="Vaccine Dose Administered amount was less than the recommended amount."/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+    </Events>
+    <Forecasts>
+        <Forecast>
+            <target name="Hep B, adolescent or pediatric" cvx="08"/>
+            <SerieStatus code="L" details="Due later"/>
+            <ForecastReason>Due later</ForecastReason>
+            <Earliest>
+                <Relative>
+                    <Rule years="0" months="6" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Earliest>
+            <Recommended>
+                <Relative>
+                    <Rule years="0" months="7" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Recommended>
+            <PastDue>
+                <Relative>
+                    <Rule years="0" months="8" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </PastDue>
+            <Latest>
+                <Relative>
+                    <Rule years="1" months="0" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Latest>
+            <DoseNumber>2</DoseNumber>
+        </Forecast>
+    </Forecasts>
+</ns2:TestCase>

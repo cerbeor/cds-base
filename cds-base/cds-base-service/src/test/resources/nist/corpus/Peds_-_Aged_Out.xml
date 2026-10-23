@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:TestCase xmlns:ns2="https://fits.nist.gov/xml/" UID="AART-CONF-6">
+    <Name>Peds - Aged Out</Name>
+    <Description></Description>
+    <Group>Discovery Confidence</Group>
+    <DateType>RELATIVE</DateType>
+    <MetaData>
+        <version>1</version>
+        <dateCreated>2018-10-09Z</dateCreated>
+        <dateLastUpdated>2026-04-08Z</dateLastUpdated>
+    </MetaData>
+    <AssessmentDate>
+        <Relative>
+            <Rule years="0" months="0" days="0" weeks="0">
+                <RelativeTo position="BEFORE" reference="EVALDATE"/>
+            </Rule>
+        </Relative>
+    </AssessmentDate>
+    <Patient>
+        <Gender>Female</Gender>
+        <DateOfBirth>
+            <Relative>
+                <Rule years="0" months="10" days="0" weeks="0">
+                    <RelativeTo position="BEFORE" reference="EVALDATE"/>
+                </Rule>
+            </Relative>
+        </DateOfBirth>
+    </Patient>
+    <Forecasts>
+        <Forecast>
+            <target name="rotavirus, unspecified formulation" cvx="122"/>
+            <SerieStatus code="G" details="Aged out"/>
+            <ForecastReason></ForecastReason>
+            <Earliest/>
+            <Recommended/>
+            <PastDue/>
+            <Latest/>
+            <DoseNumber>-</DoseNumber>
+        </Forecast>
+    </Forecasts>
+</ns2:TestCase>
