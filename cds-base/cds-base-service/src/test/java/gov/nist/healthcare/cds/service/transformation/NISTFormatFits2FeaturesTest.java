@@ -139,24 +139,35 @@ public class NISTFormatFits2FeaturesTest {
 		assertSchemaValid("evaluation-series-type.xml");
 	}
 
-	/**
-	 * FITS v2 carries the series type on {@link ExpectedEvaluation}. Nothing in
-	 * this project's domain model holds it yet, so this test can only check
-	 * that the attribute reaches the XML beans -- which is the first thing the
-	 * upgrade has to provide.
-	 */
 	@Test
 	public void importKeepsEvaluationSeriesType() throws Exception {
 		TestCase tc = importFeature("evaluation-series-type.xml");
-		VaccinationEvent event = (VaccinationEvent) tc.getEvents().get(0);
-		assertEquals(2, event.getEvaluations().size());
+		assertEquals(2, tc.getEvents().size());
 
 		Set<String> seriesTypes = new TreeSet<String>();
-		for (ExpectedEvaluation evaluation : event.getEvaluations()) {
-			seriesTypes.add(String.valueOf(seriesTypeOf(evaluation)));
+		for (gov.nist.healthcare.cds.domain.Event e : tc.getEvents()) {
+			for (ExpectedEvaluation evaluation : ((VaccinationEvent) e).getEvaluations()) {
+				seriesTypes.add(String.valueOf(evaluation.getSeriesType()));
+			}
 		}
 		assertEquals("seriesType was dropped on import", new TreeSet<String>(Arrays.asList("RISK", "STANDARD")),
 				seriesTypes);
+	}
+
+	/**
+	 * An absent seriesType must stay absent rather than defaulting to
+	 * "Standard" : the legacy corpus has no seriesType at all, and inventing
+	 * one would change every one of those documents on re-export.
+	 */
+	@Test
+	public void anAbsentSeriesTypeStaysAbsent() throws Exception {
+		TestCase tc = importFeature("metadata-change-log.xml");
+		VaccinationEvent event = (VaccinationEvent) tc.getEvents().get(0);
+		for (ExpectedEvaluation evaluation : event.getEvaluations()) {
+			assertNull("seriesType was invented on import", evaluation.getSeriesType());
+		}
+		assertFalse("seriesType was invented on export",
+				read(service.export(tc, new ExportConfig())).contains("seriesType"));
 	}
 
 	@Test
@@ -364,11 +375,19 @@ public class NISTFormatFits2FeaturesTest {
 		return read(is);
 	}
 
-	/** Import regenerates the MetaData dates; empty elements may be collapsed. */
+	/**
+	 * Import regenerates the MetaData dates; empty elements may be collapsed.
+	 *
+	 * An optional forecast date carries no information whether it is written
+	 * empty (&lt;Latest/&gt;, which the legacy corpus is full of and which
+	 * export still produces) or left out altogether, so both forms are erased
+	 * here and the two are compared as equal.
+	 */
 	private static String canonicalize(String xml) {
 		String out = xml.replaceAll("<dateCreated>[^<]*</dateCreated>", "<dateCreated/>");
 		out = out.replaceAll("<dateLastUpdated>[^<]*</dateLastUpdated>", "<dateLastUpdated/>");
 		out = out.replaceAll("<([A-Za-z][A-Za-z0-9]*)></\\1>", "<$1/>");
+		out = out.replaceAll("\\s*<(Earliest|Recommended|PastDue|Latest)/>", "");
 		return out;
 	}
 

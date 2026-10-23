@@ -55,7 +55,7 @@
             <Evaluations>
                 <Evaluation status="Substandard" seriesType="Risk">
                     <Vaccine name="Hep B, unspecified formulation" cvx="45"/>
-                    <EvaluationReason code="F" value="Vaccine Dose Administered was administered too soon after the previous dose."/>
+                    <EvaluationReason code="F" value="Vaccine Dose Administered amount was less than the recommended amount."/>
                 </Evaluation>
             </Evaluations>
         </Event>
@@ -63,7 +63,7 @@
     <Forecasts>
         <Forecast>
             <target name="Hep B, unspecified formulation" cvx="45"/>
-            <SerieStatus code="Z" details="Contraindicated"/>
+            <SerieStatus code="Z" details="Recommended but not required"/>
             <ForecastReason>Non standard series</ForecastReason>
             <Earliest>
                 <Relative>
@@ -97,7 +97,7 @@
         </Forecast>
         <Forecast>
             <target name="polio, unspecified formulation" cvx="89"/>
-            <SerieStatus code="X" details="Aged Out"/>
+            <SerieStatus code="X" details="Contraindicated"/>
             <ForecastReason></ForecastReason>
             <Earliest>
                 <Relative>

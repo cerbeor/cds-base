@@ -46,7 +46,7 @@
     <Forecasts>
         <Forecast>
             <target name="Hep B, unspecified formulation" cvx="45"/>
-            <SerieStatus code="X" details="Aged Out"/>
+            <SerieStatus code="X" details="Contraindicated"/>
             <ForecastReason>Patient has aged out of the series</ForecastReason>
             <DoseNumber>1</DoseNumber>
         </Forecast>

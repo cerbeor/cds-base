@@ -40,6 +40,18 @@
                 <Evaluation status="Valid" seriesType="Standard">
                     <Vaccine name="Hep B, unspecified formulation" cvx="45"/>
                 </Evaluation>
+            </Evaluations>
+        </Event>
+        <Event type="VACCINATION" ID="1">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="4" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="polio, unspecified formulation" cvx="89"/>
+            <Evaluations>
                 <Evaluation status="Not Valid" seriesType="Risk">
                     <Vaccine name="polio, unspecified formulation" cvx="89"/>
                     <EvaluationReason code="C" value="Vaccine Dose Administered was administered at too young of an age."/>
