@@ -34,6 +34,28 @@
 	    		<element name="Forecasts" type="tns:ForecastsType"
 	    			minOccurs="0" maxOccurs="1">
 	    		</element>
+				<element name="ForecastType" type="string" minOccurs="0" maxOccurs="1">
+				</element>
+				<element name="EvaluationType" type="string" minOccurs="0" maxOccurs="1">
+				</element>
+				<element name="WorkflowTag"
+						 minOccurs="0" maxOccurs="1">
+					<simpleType>
+						<restriction base="string">
+							<enumeration value="SUGGESTED"></enumeration>
+							<enumeration value="DELETED"></enumeration>
+							<enumeration value="ONHOLD"></enumeration>
+							<enumeration value="FINAL"></enumeration>
+						</restriction>
+					</simpleType>
+				</element>
+				<element name="Tags" minOccurs="0" maxOccurs="1">
+					<complexType>
+						<sequence maxOccurs="unbounded">
+							<element name="Tag" type="string" minOccurs="0" maxOccurs="1"/>
+						</sequence>
+					</complexType>
+				</element>
 	    	</sequence>
 	    	<attribute name="UID" type="string" use="optional"></attribute>
 	    </complexType>
@@ -44,6 +66,7 @@
     		<element name="version" type="string" minOccurs="1" maxOccurs="1"></element>
     		<element name="dateCreated" type="date" minOccurs="1" maxOccurs="1"></element>
     		<element name="dateLastUpdated" type="date" minOccurs="1" maxOccurs="1"></element>
+    		<element name="changeLog" type="string" minOccurs="0" maxOccurs="1"></element>
     	</sequence>
     </complexType>
 
@@ -116,6 +139,7 @@
     		<element name="EvaluationReason" type="tns:EvaluationReasonType" minOccurs="0" maxOccurs="1"></element>
     	</sequence>
     	<attribute name="status" type="tns:statusType" use="required"></attribute>
+    	<attribute name="seriesType" type="tns:seriesTypeType"></attribute>
     </complexType>
 
     <simpleType name="statusType">
@@ -124,6 +148,13 @@
     		<enumeration value="Not Valid"></enumeration>
     		<enumeration value="Substandard"></enumeration>
     		<enumeration value="Extraneous"></enumeration>
+    	</restriction>
+    </simpleType>
+
+    <simpleType name="seriesTypeType">
+    	<restriction base="string">
+    		<enumeration value="Standard"></enumeration>
+    		<enumeration value="Risk"></enumeration>
     	</restriction>
     </simpleType>
 
@@ -195,7 +226,9 @@
     				<enumeration value="V"></enumeration>
     				<enumeration value="W"></enumeration>
     			    <enumeration value="X"></enumeration>
-    			    <enumeration value="Z"></enumeration>
+    				<enumeration value="Z"></enumeration>
+    				<enumeration value="U"></enumeration>
+    				<enumeration value="R"></enumeration>
     			</restriction>
     		</simpleType>
     	</attribute>

@@ -49,6 +49,8 @@ public class EvaluationType {
     protected EvaluationReasonType evaluationReason;
     @XmlAttribute(name = "status", required = true)
     protected StatusType status;
+    @XmlAttribute(name = "seriesType")
+    protected SeriesTypeType seriesType;
 
     /**
      * Gets the value of the vaccine property.
@@ -120,6 +122,31 @@ public class EvaluationType {
      */
     public void setStatus(StatusType value) {
         this.status = value;
+    }
+
+
+    /**
+     * Gets the value of the seriesType property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link SeriesTypeType }
+     *     
+     */
+    public SeriesTypeType getSeriesType() {
+        return seriesType;
+    }
+
+    /**
+     * Sets the value of the seriesType property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link SeriesTypeType }
+     *     
+     */
+    public void setSeriesType(SeriesTypeType value) {
+        this.seriesType = value;
     }
 
 }

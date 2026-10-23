@@ -1,6 +1,7 @@
 package gov.nist.healthcare.cds.domain;
 
 import gov.nist.healthcare.cds.enumeration.EvaluationReason;
+import gov.nist.healthcare.cds.enumeration.EvaluationSeriesType;
 import gov.nist.healthcare.cds.enumeration.EvaluationStatus;
 
 import java.io.Serializable;
@@ -26,6 +27,8 @@ public class Evaluation implements Serializable {
 	protected EvaluationStatus status;
 	@Enumerated(EnumType.STRING)
 	protected EvaluationReason reason;
+	@Enumerated(EnumType.STRING)
+	protected EvaluationSeriesType seriesType;
 	
 	public EvaluationStatus getStatus() {
 		return status;
@@ -45,6 +48,13 @@ public class Evaluation implements Serializable {
 	}
 	public void setReason(EvaluationReason reason) {
 		this.reason = reason;
+	}
+
+	public EvaluationSeriesType getSeriesType() {
+		return seriesType;
+	}
+	public void setSeriesType(EvaluationSeriesType seriesType) {
+		this.seriesType = seriesType;
 	}
     
 }
