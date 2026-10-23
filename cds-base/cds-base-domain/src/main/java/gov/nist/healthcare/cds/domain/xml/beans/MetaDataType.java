@@ -41,7 +41,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @XmlType(name = "MetaDataType", propOrder = {
     "version",
     "dateCreated",
-    "dateLastUpdated"
+    "dateLastUpdated",
+        "changeLog"
 })
 public class MetaDataType {
 
@@ -53,6 +54,8 @@ public class MetaDataType {
     @XmlElement(required = true)
     @XmlSchemaType(name = "date")
     protected XMLGregorianCalendar dateLastUpdated;
+    @XmlElement(required = false)
+    protected String changeLog;
 
     /**
      * Gets the value of the version property.
@@ -124,6 +127,30 @@ public class MetaDataType {
      */
     public void setDateLastUpdated(XMLGregorianCalendar value) {
         this.dateLastUpdated = value;
+    }
+
+    /**
+     * Gets the value of the changeLog property.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getChangeLog() {
+        return changeLog;
+    }
+
+    /**
+     * Sets the value of the changLog property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setChangeLog(String value) {
+        this.changeLog = value;
     }
 
 }
