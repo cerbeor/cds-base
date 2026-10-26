@@ -34,6 +34,9 @@
 	    		<element name="Forecasts" type="tns:ForecastsType"
 	    			minOccurs="0" maxOccurs="1">
 	    		</element>
+	    		<element name="Conditions" type="tns:ConditionsType"
+	    			minOccurs="0" maxOccurs="1">
+	    		</element>
 				<element name="ForecastType" type="string" minOccurs="0" maxOccurs="1">
 				</element>
 				<element name="EvaluationType" type="string" minOccurs="0" maxOccurs="1">
@@ -234,6 +237,39 @@
     	</attribute>
     	<attribute name="details" type="string" use="optional"></attribute>
     </complexType>
+
+    <complexType name="ConditionsType">
+    	<sequence>
+    		<element name="Condition" type="tns:PatientConditionType" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="PatientConditionType">
+    	<sequence>
+    		<element name="Condition" type="tns:ConditionType" minOccurs="0" maxOccurs="1"></element>
+    		<element name="DateValue" type="tns:DateType" minOccurs="0" maxOccurs="1"></element>
+    		<element name="NumericValue" type="float" minOccurs="0" maxOccurs="1"></element>
+    		<element name="YesNoValue" type="boolean" minOccurs="0" maxOccurs="1"></element>
+    		<element name="AdministrativeGuidance" type="string" minOccurs="0" maxOccurs="1"></element>
+    	</sequence>
+    	<attribute name="ID" type="string" use="required"></attribute>
+    	<attribute name="type" type="tns:ConditionValueTypeType" use="required"></attribute>
+    </complexType>
+
+    <complexType name="ConditionType">
+    	<attribute name="id" type="string" use="optional"></attribute>
+    	<attribute name="code" type="string" use="optional"></attribute>
+    	<attribute name="name" type="string" use="optional"></attribute>
+    	<attribute name="type" type="tns:ConditionValueTypeType" use="optional"></attribute>
+    </complexType>
+
+    <simpleType name="ConditionValueTypeType">
+    	<restriction base="string">
+    		<enumeration value="YesNo"></enumeration>
+    		<enumeration value="Date"></enumeration>
+    		<enumeration value="Numeric"></enumeration>
+    	</restriction>
+    </simpleType>
 
     <complexType name="EvaluationReasonType">
     	<attribute name="code" type="string" use="required"></attribute>

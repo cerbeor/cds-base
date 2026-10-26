@@ -90,6 +90,11 @@
             <YesNoValue>false</YesNoValue>
             <AdministrativeGuidance>Sample for non present condition</AdministrativeGuidance>
         </Condition>
+        <Condition ID="9042" type="Numeric">
+            <Condition id="US-C-210" code="US-C-210" name="CD4 count" type="Numeric"/>
+            <NumericValue>432.5</NumericValue>
+            <AdministrativeGuidance>Synthetic sample : no real export exercises NumericValue yet</AdministrativeGuidance>
+        </Condition>
         <Condition ID="7876" type="YesNo">
             <Condition id="US-C-031" code="US-C-031" name="Tuberculosis" type="YesNo"/>
             <YesNoValue>true</YesNoValue>

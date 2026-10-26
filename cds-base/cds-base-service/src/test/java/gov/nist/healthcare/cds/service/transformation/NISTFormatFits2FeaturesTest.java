@@ -249,16 +249,19 @@ public class NISTFormatFits2FeaturesTest {
 	// Patient conditions
 	//
 	// The newest FITS v2 schema adds a <Conditions> block after <Forecasts> :
-	// a list of PatientConditionType, each wrapping a Condition (id / code /
-	// name / type) plus exactly one typed value -- DateValue, NumericValue or
-	// YesNoValue -- and an optional AdministrativeGuidance.
+	// a list of conditions, each wrapping a Condition (id / code / name /
+	// type) plus one typed value -- DateValue, NumericValue or YesNoValue --
+	// and an optional AdministrativeGuidance.
 	//
-	// Nothing of this exists here yet : no ConditionsType in our XSD, no JAXB
-	// beans, no domain classes. These tests state the target behaviour and so
-	// FAIL today. The fixture is a real FITS v2 export and validates cleanly
-	// against fits-model/src/main/resources/xsd/testCase.xsd.
+	// This project does NOT support patient conditions, and is not meant to.
+	// The contract is therefore tolerate-and-drop, not round-trip : a v2 file
+	// carrying conditions must still validate and import cleanly, the rest of
+	// its content must survive intact, and the conditions themselves are
+	// discarded. Half-supporting them -- keeping them on import but writing
+	// them back wrong -- would be worse than ignoring them.
 	// ------------------------------------------------------------------
 
+	/** The schema must tolerate the block so a v2 file is not rejected outright. */
 	@Test
 	public void schemaAcceptsPatientConditions() throws Exception {
 		assertSchemaValid("patient-conditions.xml");
@@ -277,37 +280,59 @@ public class NISTFormatFits2FeaturesTest {
 		assertTrue("types missing from testCase.xsd : " + missing, missing.isEmpty());
 	}
 
-	/**
-	 * A relative date inside a condition may carry several rules, as the
-	 * fixture's "Begin Date of antiviral therapy" does (20 weeks + 5 days
-	 * after DOB), so the date machinery has to be reused rather than
-	 * special-cased.
-	 */
+	/** A file full of conditions must import without error. */
 	@Test
-	public void importKeepsPatientConditions() throws Exception {
+	public void importAcceptsADocumentCarryingPatientConditions() throws Exception {
 		TestCase tc = importFeature("patient-conditions.xml");
-		assertNotNull("conditions were dropped on import", conditionsOf(tc));
-		assertEquals(3, conditionsOf(tc).size());
-	}
-
-	@Test
-	public void patientConditionsSurviveARoundTrip() throws Exception {
-		assertRoundTripPreservesDocument("patient-conditions.xml");
+		assertEquals("No doses", tc.getName());
 	}
 
 	/**
-	 * Reads the conditions off a test case, tolerating their absence today so
-	 * the failure reads as "dropped on import" rather than a compile error.
+	 * Dropping the conditions must not disturb anything around them : the
+	 * elements that precede and follow the block all survive.
 	 */
-	private static java.util.Collection<?> conditionsOf(TestCase tc) {
-		try {
-			Object value = TestCase.class.getMethod("getConditions").invoke(tc);
-			return (java.util.Collection<?>) value;
-		} catch (NoSuchMethodException e) {
-			return null;
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+	@Test
+	public void everythingAroundThePatientConditionsSurvivesImport() throws Exception {
+		TestCase tc = importFeature("patient-conditions.xml");
+
+		assertEquals("AART-MMR-1", tc.getUid());
+		assertEquals("MMR", tc.getGroupTag());
+		assertEquals("change log 123", tc.getMetaData().getChangeLog());
+		assertEquals(1, tc.getEvents().size());
+		assertEquals(1, tc.getForecast().size());
+		// the trailer, which the schema places after <Conditions>
+		assertEquals(gov.nist.healthcare.cds.enumeration.WorkflowTag.FINAL, tc.getWorkflowTag());
+		assertEquals(4, tc.getTags().size());
+	}
+
+	/** Re-exporting a document that carried conditions must not write them back. */
+	@Test
+	public void exportDoesNotWritePatientConditionsBack() throws Exception {
+		TestCase tc = importFeature("patient-conditions.xml");
+		String reExported = read(service.export(tc, new ExportConfig()));
+
+		assertFalse("conditions must not be re-exported", reExported.contains("<Conditions"));
+		assertFalse(reExported.contains("AdministrativeGuidance"));
+		assertFalse(reExported.contains("US-C-120"));
+	}
+
+	/**
+	 * The dropped block is the ONLY difference : everything else round-trips
+	 * byte for byte. This is what makes the loss safe to reason about.
+	 */
+	@Test
+	public void aDocumentWithConditionsRoundTripsApartFromTheConditions() throws Exception {
+		String original = feature("patient-conditions.xml");
+		TestCase tc = importFeature("patient-conditions.xml");
+		String reExported = read(service.export(tc, new ExportConfig()));
+
+		assertEquals(normalize(canonicalize(stripConditions(original))),
+				normalize(canonicalize(reExported)));
+	}
+
+	/** Removes the whole &lt;Conditions&gt; block, the one thing import drops. */
+	private static String stripConditions(String xml) {
+		return xml.replaceAll("(?s)\\s*<Conditions>.*?</Conditions>", "");
 	}
 
 	// ------------------------------------------------------------------

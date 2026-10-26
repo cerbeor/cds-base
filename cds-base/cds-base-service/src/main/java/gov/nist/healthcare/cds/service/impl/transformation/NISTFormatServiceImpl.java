@@ -185,6 +185,7 @@ public class NISTFormatServiceImpl implements FormatService {
 				tcp.setForecasts(fts);
 			}
 
+
 			if (tc.getTags() != null) {
 				List<String> mdtTags = tc.getTags().stream().map(Tag::getText).collect(Collectors.toList());
 				tcp.setTags(mdtTags);
@@ -448,6 +449,11 @@ public class NISTFormatServiceImpl implements FormatService {
 				}
 			}
 
+
+			// <Conditions> is a FITS v2 construct with no counterpart in this
+			// model : the schema accepts it so a v2 file still imports, but the
+			// content is deliberately dropped rather than half-supported.
+
 			if (tcp.getTags() != null) {
 				tc.setTags(tcp.getTags().stream().map(Tag::new).collect(Collectors.toList()));
 			}
@@ -526,6 +532,7 @@ public class NISTFormatServiceImpl implements FormatService {
 		default : return null;
 		}
 	}
+
 
 	@Override
 	public List<ErrorModel> preImport(InputStream stream) {

@@ -59,6 +59,7 @@ import java.util.List;
         "patient",
         "events",
         "forecasts",
+        "conditions",
         "forecastType",
         "evaluationType",
         "workflowTag",
@@ -87,6 +88,8 @@ public class TestCase {
     protected ForecastsType forecasts;
     @XmlAttribute(name = "UID")
     protected String uid;
+    @XmlElement(name = "Conditions")
+    protected ConditionsType conditions;
     @XmlElement(name = "ForecastType")
     protected String forecastType;
     @XmlElement(name = "EvaluationType")
@@ -445,4 +448,29 @@ public class TestCase {
     public void setEvaluationType(String value) {
         this.evaluationType = value;
     }
+
+    /**
+     * Gets the value of the conditions property.
+     *
+     * @return
+     *     possible object is
+     *     {@link ConditionsType }
+     *
+     */
+    public ConditionsType getConditions() {
+        return conditions;
+    }
+
+    /**
+     * Sets the value of the conditions property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link ConditionsType }
+     *
+     */
+    public void setConditions(ConditionsType value) {
+        this.conditions = value;
+    }
+
 }
