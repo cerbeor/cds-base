@@ -71,6 +71,8 @@ public class NISTFormatFits2FeaturesTest {
 
 	private static final String CVX_HEPB_UNSPEC = "45";
 	private static final String CVX_POLIO_UNSPEC = "89";
+	private static final String CVX_OPV = "02";
+	private static final String CVX_MMR = "03";
 
 	@Mock
 	private VaccineRepository vaccineRepository;
@@ -90,6 +92,8 @@ public class NISTFormatFits2FeaturesTest {
 				.thenReturn(vaccine(CVX_HEPB_UNSPEC, "Hep B, unspecified formulation"));
 		when(vaccineRepository.findOne(CVX_POLIO_UNSPEC))
 				.thenReturn(vaccine(CVX_POLIO_UNSPEC, "polio, unspecified formulation"));
+		when(vaccineRepository.findOne(CVX_OPV)).thenReturn(vaccine(CVX_OPV, "OPV, trivalent"));
+		when(vaccineRepository.findOne(CVX_MMR)).thenReturn(vaccine(CVX_MMR, "MMR"));
 
 		when(mdService.create(anyBoolean())).thenAnswer(new Answer<MetaData>() {
 			@Override
@@ -239,6 +243,71 @@ public class NISTFormatFits2FeaturesTest {
 	@Test
 	public void aForecastWithoutDatesSurvivesARoundTrip() throws Exception {
 		assertRoundTripPreservesDocument("forecast-without-dates.xml");
+	}
+
+	// ------------------------------------------------------------------
+	// Patient conditions
+	//
+	// The newest FITS v2 schema adds a <Conditions> block after <Forecasts> :
+	// a list of PatientConditionType, each wrapping a Condition (id / code /
+	// name / type) plus exactly one typed value -- DateValue, NumericValue or
+	// YesNoValue -- and an optional AdministrativeGuidance.
+	//
+	// Nothing of this exists here yet : no ConditionsType in our XSD, no JAXB
+	// beans, no domain classes. These tests state the target behaviour and so
+	// FAIL today. The fixture is a real FITS v2 export and validates cleanly
+	// against fits-model/src/main/resources/xsd/testCase.xsd.
+	// ------------------------------------------------------------------
+
+	@Test
+	public void schemaAcceptsPatientConditions() throws Exception {
+		assertSchemaValid("patient-conditions.xml");
+	}
+
+	@Test
+	public void xsdDeclaresTheConditionTypes() throws Exception {
+		String xsd = xsd();
+		List<String> missing = new ArrayList<String>();
+		for (String type : Arrays.asList("ConditionsType", "PatientConditionType", "ConditionType",
+				"ConditionValueTypeType")) {
+			if (!xsd.contains("name=\"" + type + "\"")) {
+				missing.add(type);
+			}
+		}
+		assertTrue("types missing from testCase.xsd : " + missing, missing.isEmpty());
+	}
+
+	/**
+	 * A relative date inside a condition may carry several rules, as the
+	 * fixture's "Begin Date of antiviral therapy" does (20 weeks + 5 days
+	 * after DOB), so the date machinery has to be reused rather than
+	 * special-cased.
+	 */
+	@Test
+	public void importKeepsPatientConditions() throws Exception {
+		TestCase tc = importFeature("patient-conditions.xml");
+		assertNotNull("conditions were dropped on import", conditionsOf(tc));
+		assertEquals(3, conditionsOf(tc).size());
+	}
+
+	@Test
+	public void patientConditionsSurviveARoundTrip() throws Exception {
+		assertRoundTripPreservesDocument("patient-conditions.xml");
+	}
+
+	/**
+	 * Reads the conditions off a test case, tolerating their absence today so
+	 * the failure reads as "dropped on import" rather than a compile error.
+	 */
+	private static java.util.Collection<?> conditionsOf(TestCase tc) {
+		try {
+			Object value = TestCase.class.getMethod("getConditions").invoke(tc);
+			return (java.util.Collection<?>) value;
+		} catch (NoSuchMethodException e) {
+			return null;
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	// ------------------------------------------------------------------

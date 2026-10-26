@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:TestCase xmlns:ns2="https://fits.nist.gov/xml/" UID="AART-MMR-1">
+    <Name>No doses</Name>
+    <Description>description 1</Description>
+    <Group>MMR</Group>
+    <DateType>RELATIVE</DateType>
+    <MetaData>
+        <version>1</version>
+        <dateCreated>2018-09-19-04:00</dateCreated>
+        <dateLastUpdated>2026-10-26-04:00</dateLastUpdated>
+        <changeLog>change log 123</changeLog>
+    </MetaData>
+    <AssessmentDate>
+        <Relative>
+            <Rule years="0" months="0" days="0" weeks="0">
+                <RelativeTo position="BEFORE" reference="EVALDATE"/>
+            </Rule>
+        </Relative>
+    </AssessmentDate>
+    <Patient>
+        <Gender>Female</Gender>
+        <DateOfBirth>
+            <Relative>
+                <Rule years="0" months="8" days="0" weeks="0">
+                    <RelativeTo position="BEFORE" reference="EVALDATE"/>
+                </Rule>
+            </Relative>
+        </DateOfBirth>
+    </Patient>
+    <Events>
+        <Event type="VACCINATION" ID="0">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="0" days="2" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="OPV, trivalent" cvx="02"/>
+            <Evaluations/>
+        </Event>
+    </Events>
+    <Forecasts>
+        <Forecast>
+            <target name="MMR" cvx="03"/>
+            <SerieStatus code="N" details="Not complete"/>
+            <ForecastReason></ForecastReason>
+            <Earliest>
+                <Relative>
+                    <Rule years="0" months="12" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Earliest>
+            <Recommended>
+                <Relative>
+                    <Rule years="0" months="12" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </Recommended>
+            <PastDue>
+                <Relative>
+                    <Rule years="0" months="16" days="-1" weeks="4">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </PastDue>
+            <Latest/>
+            <DoseNumber>1</DoseNumber>
+        </Forecast>
+    </Forecasts>
+    <Conditions>
+        <Condition ID="1104" type="Date">
+            <Condition id="US-C-120" code="US-C-120" name="Begin Date of antiviral therapy [ART]" type="Date"/>
+            <DateValue>
+                <Relative>
+                    <Rule years="0" months="0" days="0" weeks="20">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                    <Rule years="0" months="0" days="5" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </DateValue>
+            <AdministrativeGuidance>Sample guidance for example</AdministrativeGuidance>
+        </Condition>
+        <Condition ID="7818" type="YesNo">
+            <Condition id="US-C-003" code="US-C-003" name="Immunocompromised" type="YesNo"/>
+            <YesNoValue>false</YesNoValue>
+            <AdministrativeGuidance>Sample for non present condition</AdministrativeGuidance>
+        </Condition>
+        <Condition ID="7876" type="YesNo">
+            <Condition id="US-C-031" code="US-C-031" name="Tuberculosis" type="YesNo"/>
+            <YesNoValue>true</YesNoValue>
+            <AdministrativeGuidance>Sample for present condition</AdministrativeGuidance>
+        </Condition>
+    </Conditions>
+    <WorkflowTag>FINAL</WorkflowTag>
+    <Tags>
+        <Tag>tag1</Tag>
+        <Tag>test</Tag>
+        <Tag>tag2</Tag>
+        <Tag>tag3</Tag>
+    </Tags>
+</ns2:TestCase>

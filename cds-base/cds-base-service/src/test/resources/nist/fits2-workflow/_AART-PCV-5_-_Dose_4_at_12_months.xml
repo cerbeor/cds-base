@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:TestCase xmlns:ns2="https://fits.nist.gov/xml/" UID="AART-PCV-5">
+    <Name>Dose 4 at 12 months</Name>
+    <Description></Description>
+    <Group>PCV</Group>
+    <DateType>RELATIVE</DateType>
+    <MetaData>
+        <version>3</version>
+        <dateCreated>2018-10-16-04:00</dateCreated>
+        <dateLastUpdated>2026-10-26-04:00</dateLastUpdated>
+    </MetaData>
+    <AssessmentDate>
+        <Relative>
+            <Rule years="0" months="0" days="0" weeks="0">
+                <RelativeTo position="BEFORE" reference="EVALDATE"/>
+            </Rule>
+        </Relative>
+    </AssessmentDate>
+    <Patient>
+        <Gender>Female</Gender>
+        <DateOfBirth>
+            <Relative>
+                <Rule years="0" months="12" days="0" weeks="0">
+                    <RelativeTo position="BEFORE" reference="EVALDATE"/>
+                </Rule>
+            </Relative>
+        </DateOfBirth>
+    </Patient>
+    <Events>
+        <Event type="VACCINATION" ID="0">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="2" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="Pneumococcal conjugate PCV15, polysaccharide CRM197 conjugate, adjuvant, PF" cvx="215"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="Pneumococcal Conjugate, unspecified formulation" cvx="152"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+        <Event type="VACCINATION" ID="1">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="4" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="Pneumococcal conjugate PCV15, polysaccharide CRM197 conjugate, adjuvant, PF" cvx="215"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="Pneumococcal Conjugate, unspecified formulation" cvx="152"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+        <Event type="VACCINATION" ID="2">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="6" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="Pneumococcal conjugate PCV15, polysaccharide CRM197 conjugate, adjuvant, PF" cvx="215"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="Pneumococcal Conjugate, unspecified formulation" cvx="152"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+        <Event type="VACCINATION" ID="3">
+            <EventDate>
+                <Relative>
+                    <Rule years="0" months="12" days="0" weeks="0">
+                        <RelativeTo position="AFTER" reference="DOB"/>
+                    </Rule>
+                </Relative>
+            </EventDate>
+            <Administred name="Pneumococcal conjugate PCV15, polysaccharide CRM197 conjugate, adjuvant, PF" cvx="215"/>
+            <Evaluations>
+                <Evaluation status="Valid">
+                    <Vaccine name="Pneumococcal Conjugate, unspecified formulation" cvx="152"/>
+                </Evaluation>
+            </Evaluations>
+        </Event>
+    </Events>
+    <Forecasts>
+        <Forecast>
+            <target name="Pneumococcal Conjugate, unspecified formulation" cvx="152"/>
+            <SerieStatus code="C" details="Complete"/>
+            <ForecastReason></ForecastReason>
+            <Earliest/>
+            <Recommended/>
+            <PastDue/>
+            <Latest/>
+            <DoseNumber>-</DoseNumber>
+        </Forecast>
+    </Forecasts>
+    <WorkflowTag>FINAL</WorkflowTag>
+</ns2:TestCase>
