@@ -317,17 +317,6 @@ public class NISTFormatFits2FeaturesTest {
 	// helpers
 	// ------------------------------------------------------------------
 
-	/** Reads the series type off an evaluation, tolerating its absence today. */
-	private static Object seriesTypeOf(ExpectedEvaluation evaluation) {
-		try {
-			return ExpectedEvaluation.class.getMethod("getSeriesType").invoke(evaluation);
-		} catch (NoSuchMethodException e) {
-			return "<ExpectedEvaluation has no seriesType>";
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
 	private void assertSchemaValid(String file) throws Exception {
 		List<ErrorModel> errors = service.preImport(stream(feature(file)));
 		assertNotNull("schema could not be loaded", errors);
