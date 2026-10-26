@@ -601,14 +601,44 @@ public class NISTFormatServiceImpl implements FormatService {
 		return exportResult;
 	}
 
+	/**
+	 * The longest file name produced, extension included. Keeps the whole
+	 * path well inside the limits of the file systems the zip is unpacked on
+	 * (a few of which still cap a single path component at 255 bytes, and
+	 * count the folder the archive is extracted into on top of that).
+	 */
+	public static final int MAX_NAME_LENGTH = 120;
+
+	private static final String EXTENSION = ".xml";
+
+	/**
+	 * Picks a file name for a test case that no other export in this batch is
+	 * using, and registers it in {@code names}.
+	 *
+	 * Duplicates get a numeric suffix -- {@code name_2}, {@code name_3} and so
+	 * on -- rather than a repeated marker, so a hundred test cases sharing a
+	 * name stay readable and the name stops growing. The result, extension
+	 * included, is never longer than {@link #MAX_NAME_LENGTH} : a long base
+	 * name is truncated to make room for the suffix rather than the suffix
+	 * being dropped, since the suffix is what keeps the name unique.
+	 */
 	public String findName(String str, List<String> names){
-		if(names.contains(str)){
-			return findName(str+"_1", names);
+		String base = str == null || str.isEmpty() ? "test-case" : str;
+		String candidate = truncate(base, EXTENSION.length());
+		int counter = 1;
+		while(names.contains(candidate)){
+			counter++;
+			String suffix = "_" + counter;
+			candidate = truncate(base, EXTENSION.length() + suffix.length()) + suffix;
 		}
-		else {
-			names.add(str);
-			return str;
-		}
+		names.add(candidate);
+		return candidate;
+	}
+
+	/** Shortens a base name so that it still fits once {@code reserved} more characters are appended. */
+	private String truncate(String base, int reserved){
+		int room = MAX_NAME_LENGTH - reserved;
+		return base.length() <= room ? base : base.substring(0, room);
 	}
 
 }

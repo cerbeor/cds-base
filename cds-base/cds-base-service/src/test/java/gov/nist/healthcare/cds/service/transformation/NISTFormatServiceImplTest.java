@@ -223,14 +223,80 @@ public class NISTFormatServiceImplTest {
 		for (ExportedFileStream efs : result.getReader()) {
 			names.add(efs.getName());
 		}
-		assertEquals(Arrays.asList("Test_Case__1.xml", "Test_Case__1_1.xml", "Keep-This.1.xml"), names);
+		assertEquals(Arrays.asList("Test_Case__1.xml", "Test_Case__1_2.xml", "Keep-This.1.xml"), names);
 	}
 
 	@Test
-	public void findNameAppendsSuffixUntilUnique() {
-		List<String> names = new ArrayList<String>(Arrays.asList("a", "a_1"));
-		assertEquals("a_1_1", service.findName("a", names));
-		assertTrue(names.contains("a_1_1"));
+	public void findNameNumbersDuplicatesInsteadOfRepeatingASuffix() {
+		List<String> names = new ArrayList<String>();
+		assertEquals("a", service.findName("a", names));
+		assertEquals("a_2", service.findName("a", names));
+		assertEquals("a_3", service.findName("a", names));
+		assertEquals("a_4", service.findName("a", names));
+	}
+
+	/**
+	 * The old implementation appended "_1" per collision, so the 16th test
+	 * case sharing a name carried fifteen of them. The name must stay about
+	 * as long as the original however many duplicates there are.
+	 */
+	@Test
+	public void findNameStaysShortForManyDuplicates() {
+		List<String> names = new ArrayList<String>();
+		String base = "Peds_-_Series_Not_Complete";
+		String last = null;
+		for (int i = 0; i < 200; i++) {
+			last = service.findName(base, names);
+		}
+		assertEquals("Peds_-_Series_Not_Complete_200", last);
+		assertEquals(200, new java.util.HashSet<String>(names).size());
+	}
+
+	/** However long the test case name, the file name stays within the cap. */
+	@Test
+	public void findNameTruncatesOverlongNames() {
+		StringBuilder longName = new StringBuilder();
+		for (int i = 0; i < 400; i++) {
+			longName.append('x');
+		}
+		List<String> names = new ArrayList<String>();
+		for (int i = 0; i < 20; i++) {
+			String name = service.findName(longName.toString(), names);
+			assertTrue("name too long : " + name.length(),
+					name.length() + ".xml".length() <= NISTFormatServiceImpl.MAX_NAME_LENGTH);
+		}
+		assertEquals("truncation must not cost uniqueness", 20, new java.util.HashSet<String>(names).size());
+	}
+
+	/** A suffixed name must never collide with a test case literally called that. */
+	@Test
+	public void findNameDoesNotCollideWithAnExplicitlyNumberedName() {
+		List<String> names = new ArrayList<String>();
+		assertEquals("a", service.findName("a", names));
+		assertEquals("a_2", service.findName("a_2", names));
+		assertEquals("a_3", service.findName("a", names));
+		assertEquals(3, new java.util.HashSet<String>(names).size());
+	}
+
+	/** Every produced name must be safe as a zip entry on every platform. */
+	@Test
+	public void exportedFileNamesContainNoCharactersIllegalOnWindows() throws Exception {
+		List<TestCase> tcs = new ArrayList<TestCase>();
+		for (int i = 0; i < 16; i++) {
+			TestCase tc = minimalTestCase();
+			tc.setName("Peds - Valid");
+			tcs.add(tc);
+		}
+
+		ExportResult result = service.exportToFile(tcs, new ExportConfig());
+		Set<String> seen = new java.util.HashSet<String>();
+		for (ExportedFileStream efs : result.getReader()) {
+			String name = efs.getName();
+			assertFalse(name + " contains a character illegal on Windows",
+					Pattern.compile("[*?:\"<>|\\\\/]").matcher(name).find());
+			assertTrue("duplicate entry name " + name, seen.add(name));
+		}
+		assertEquals(16, seen.size());
 	}
 
 

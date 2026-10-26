@@ -82,10 +82,7 @@ public class ZipExportSummary  extends ExportSummary {
 		for(ExportedFileStream efs : toAdd.getReader()){
 			byte data[] = new byte[BUFFER];
 			this.resultFor(efs.getName());
-			String name = efs.getName();
-			while(names.contains(name)){
-				name ="*"+name;
-			}
+			String name = uniqueName(efs.getName(), names);
 			ZipEntry e = new ZipEntry(name);
 			out.putNextEntry(e);
 			int size = -1;
@@ -99,6 +96,33 @@ public class ZipExportSummary  extends ExportSummary {
 		}
 	}
 	
+	/**
+	 * Makes an entry name unique within the archive by inserting a numeric
+	 * suffix before the extension : {@code name.xml}, {@code name_2.xml} and
+	 * so on.
+	 *
+	 * This used to prepend {@code *} per collision, which produced entries
+	 * that Windows and several archive tools refuse to extract, so the files
+	 * silently went missing from the unpacked folder. The formatter normally
+	 * hands over names that are already unique; this is the backstop for the
+	 * case where two formatters, or two batches, meet in one archive.
+	 */
+	static String uniqueName(String name, List<String> taken){
+		if(!taken.contains(name)){
+			return name;
+		}
+		int dot = name.lastIndexOf('.');
+		String stem = dot == -1 ? name : name.substring(0, dot);
+		String extension = dot == -1 ? "" : name.substring(dot);
+		int counter = 1;
+		String candidate;
+		do {
+			counter++;
+			candidate = stem + "_" + counter + extension;
+		} while(taken.contains(candidate));
+		return candidate;
+	}
+
 	public void invalid(String name, List<ErrorModel> errors){
 		EntityResult rs = this.resultFor(name);
 		rs.setErrors(errors);
