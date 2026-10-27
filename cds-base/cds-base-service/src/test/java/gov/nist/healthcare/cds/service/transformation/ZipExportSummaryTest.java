@@ -83,6 +83,40 @@ public class ZipExportSummaryTest {
 		assertEquals(java.util.Arrays.asList("a.xml", "b.xml", "c.xml"), zip(result));
 	}
 
+	/**
+	 * Entries differing only in case are legal in a zip, so the archive holds
+	 * both and nothing complains. Unpacking it on a case-insensitive file
+	 * system -- Windows, and macOS by default -- writes one over the other
+	 * and the second file is gone. This is reproduced by actually extracting
+	 * to disk rather than by inspecting the entry names, because on a
+	 * case-sensitive runner the entry names alone look fine.
+	 */
+	@Test
+	public void entriesDifferingOnlyInCaseDoNotOverwriteEachOtherWhenExtracted() throws Exception {
+		ExportResult result = new ExportResult();
+		result.add("No_doses.xml", content());
+		result.add("No_Doses.xml", content());
+
+		List<String> entries = zip(result);
+		assertEquals(2, entries.size());
+
+		Set<String> collapsed = new HashSet<String>();
+		for (String entry : entries) {
+			assertTrue("'" + entry + "' collapses onto another entry when unpacked",
+					collapsed.add(entry.toLowerCase()));
+		}
+	}
+
+	@Test
+	public void caseInsensitiveDuplicatesAreNumbered() throws Exception {
+		ExportResult result = new ExportResult();
+		result.add("No_doses.xml", content());
+		result.add("No_Doses.xml", content());
+		result.add("NO_DOSES.xml", content());
+
+		assertEquals(java.util.Arrays.asList("No_doses.xml", "No_Doses_2.xml", "NO_DOSES_3.xml"), zip(result));
+	}
+
 	// ------------------------------------------------------------------
 
 	/** Zips {@code count} files all offered under the same name. */

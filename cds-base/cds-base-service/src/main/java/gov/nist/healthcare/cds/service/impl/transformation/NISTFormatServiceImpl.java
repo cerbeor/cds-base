@@ -621,18 +621,34 @@ public class NISTFormatServiceImpl implements FormatService {
 	 * included, is never longer than {@link #MAX_NAME_LENGTH} : a long base
 	 * name is truncated to make room for the suffix rather than the suffix
 	 * being dropped, since the suffix is what keeps the name unique.
+	 *
+	 * Names that differ only in case count as duplicates. Two test cases
+	 * called "No doses" and "No Doses" would otherwise be written to the
+	 * archive as two legitimately distinct entries, and then silently
+	 * collapse into one file when it is unpacked on Windows or macOS, whose
+	 * file systems are case insensitive by default.
 	 */
 	public String findName(String str, List<String> names){
 		String base = str == null || str.isEmpty() ? "test-case" : str;
 		String candidate = truncate(base, EXTENSION.length());
 		int counter = 1;
-		while(names.contains(candidate)){
+		while(containsIgnoreCase(names, candidate)){
 			counter++;
 			String suffix = "_" + counter;
 			candidate = truncate(base, EXTENSION.length() + suffix.length()) + suffix;
 		}
 		names.add(candidate);
 		return candidate;
+	}
+
+	/** Case-insensitive membership, so names that only differ in case collide. */
+	private boolean containsIgnoreCase(List<String> names, String candidate){
+		for(String name : names){
+			if(name.equalsIgnoreCase(candidate)){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Shortens a base name so that it still fits once {@code reserved} more characters are appended. */

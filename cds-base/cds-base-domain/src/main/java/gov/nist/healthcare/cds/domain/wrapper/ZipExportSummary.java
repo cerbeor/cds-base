@@ -106,9 +106,14 @@ public class ZipExportSummary  extends ExportSummary {
 	 * silently went missing from the unpacked folder. The formatter normally
 	 * hands over names that are already unique; this is the backstop for the
 	 * case where two formatters, or two batches, meet in one archive.
+	 *
+	 * Names that differ only in case are treated as the same name : the
+	 * archive would hold both, but unpacking it on Windows or macOS -- where
+	 * the file system ignores case -- writes one over the other and the file
+	 * is lost without any warning.
 	 */
 	static String uniqueName(String name, List<String> taken){
-		if(!taken.contains(name)){
+		if(!containsIgnoreCase(taken, name)){
 			return name;
 		}
 		int dot = name.lastIndexOf('.');
@@ -119,8 +124,17 @@ public class ZipExportSummary  extends ExportSummary {
 		do {
 			counter++;
 			candidate = stem + "_" + counter + extension;
-		} while(taken.contains(candidate));
+		} while(containsIgnoreCase(taken, candidate));
 		return candidate;
+	}
+
+	private static boolean containsIgnoreCase(List<String> names, String candidate){
+		for(String name : names){
+			if(name.equalsIgnoreCase(candidate)){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void invalid(String name, List<ErrorModel> errors){

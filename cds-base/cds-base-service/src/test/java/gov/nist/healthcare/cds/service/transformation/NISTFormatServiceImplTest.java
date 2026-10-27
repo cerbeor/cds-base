@@ -278,6 +278,46 @@ public class NISTFormatServiceImplTest {
 		assertEquals(3, new java.util.HashSet<String>(names).size());
 	}
 
+	/**
+	 * Two test cases whose names differ only in case -- "No doses" and
+	 * "No Doses" -- must not produce file names that differ only in case.
+	 * Both entries reach the archive, but unpacking it on Windows or macOS
+	 * writes one over the other and a test case silently disappears.
+	 */
+	@Test
+	public void findNameTreatsNamesDifferingOnlyInCaseAsDuplicates() {
+		List<String> names = new ArrayList<String>();
+		assertEquals("No_doses", service.findName("No_doses", names));
+		assertEquals("No_Doses_2", service.findName("No_Doses", names));
+		assertEquals("NO_DOSES_3", service.findName("NO_DOSES", names));
+	}
+
+	/** The real scenario : 11 "No doses" plus one "No Doses" in one export. */
+	@Test
+	public void exportedFileNamesAreUniqueIgnoringCase() throws Exception {
+		List<TestCase> tcs = new ArrayList<TestCase>();
+		for (int i = 0; i < 11; i++) {
+			TestCase tc = minimalTestCase();
+			tc.setName("No doses");
+			tcs.add(tc);
+		}
+		TestCase odd = minimalTestCase();
+		odd.setName("No Doses");
+		tcs.add(odd);
+
+		ExportResult result = service.exportToFile(tcs, new ExportConfig());
+
+		Set<String> lowercased = new TreeSet<String>();
+		int count = 0;
+		for (ExportedFileStream efs : result.getReader()) {
+			count++;
+			assertTrue("two entries collapse to the same file when unpacked : " + efs.getName(),
+					lowercased.add(efs.getName().toLowerCase()));
+		}
+		assertEquals(12, count);
+		assertEquals("a test case would be lost on extraction", 12, lowercased.size());
+	}
+
 	/** Every produced name must be safe as a zip entry on every platform. */
 	@Test
 	public void exportedFileNamesContainNoCharactersIllegalOnWindows() throws Exception {
